@@ -1,0 +1,17 @@
+# Phase 0 stack: Qdrant only. Later phases add the api and ui services.
+# Start with:  docker compose up -d
+# Dashboard:   http://localhost:6333/dashboard
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: securerag-qdrant
+    ports:
+      - "6333:6333" # REST + dashboard
+      - "6334:6334" # gRPC
+    volumes:
+      # Named volume so data survives `docker compose down` (only `down -v` wipes it).
+      - qdrant_storage:/qdrant/storage
+    restart: unless-stopped
+
+volumes:
+  qdrant_storage:

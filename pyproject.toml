@@ -1,0 +1,36 @@
+[project]
+name = "securerag"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "fastembed>=0.9.0",
+    "ollama>=0.6.3",
+    "pydantic-settings>=2.16.1",
+    "python-dotenv>=1.2.4",
+    "qdrant-client>=1.19.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.17.1",
+]
+
+[tool.ruff]
+# Spec standard: one fast tool for lint + format. Line length matches Black's default.
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+# E/F = pyflakes+pycodestyle, I = isort, UP = pyupgrade, B = bugbear, D = docstrings.
+select = ["E", "F", "I", "UP", "B", "D"]
+# D203/D213 conflict with D211/D212; pick the common set. Allow missing docstrings in tests.
+ignore = ["D203", "D213"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
+"scripts/**" = ["D"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
