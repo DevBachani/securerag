@@ -3,12 +3,20 @@ name = "securerag"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
+    "diskcache>=5.6.3",
     "fastembed>=0.9.0",
     "fpdf2>=2.8.9",
+    "langchain-core>=1.7.0",
+    "langchain-ollama>=1.1.0",
+    "llama-index-core>=0.14.25",
+    "llama-index-embeddings-fastembed>=0.7.0",
+    "llama-index-llms-groq>=0.6.1",
+    "llama-index-llms-ollama>=0.11.0",
     "ollama>=0.6.3",
     "pydantic-settings>=2.16.1",
     "python-dotenv>=1.2.4",
     "qdrant-client>=1.19.1",
+    "tenacity>=9.2.1",
 ]
 
 [dependency-groups]
@@ -35,3 +43,5 @@ ignore = ["D203", "D213"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+# src/ layout: make the `securerag` package importable in tests without an install step.
+pythonpath = ["src"]

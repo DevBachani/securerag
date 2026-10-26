@@ -1,6 +1,6 @@
 # PROGRESS
 
-## Current phase: 2 — Configuration and model providers
+## Current phase: 3 — Ingestion pipeline
 ## Status: not started
 
 ## Environment
@@ -14,9 +14,13 @@
 |---|---|---|---|
 | 0 — Environment setup | 2026-10-26 | chore: project setup, qdrant, smoke test | Smoke test 3/3: LLM OK, embed 384, Qdrant up. Ollama/llama3.1. |
 | 1 — Synthetic corpus and manifest | 2026-10-26 | feat(data): synthetic Acme corpus with ACL manifest | 26 docs (23 md + 3 pdf), manifest + FACTS.md, 55 manifest tests pass. Traps excluded. |
+| 2 — Configuration and model providers | 2026-10-26 | feat(core): settings and pluggable model providers | Settings + factories (llm/judge/embed/reranker/langchain), tenacity backoff, diskcache embed cache. 63 tests, smoke 3/3. Reranker/gemini lazy. |
 
 ## Key decisions (and why)
 - LLM = Ollama / llama3.1:latest (local): no API key, no free-tier limits; machine already has it installed.
+- Phase 2: reranker, Gemini, and LangChain-Groq backends are lazy-imported (clear error if called) so
+  PyTorch and unused SDKs are not installed until the phase that needs them (reranker -> Phase 8).
+- src/ layout: `pythonpath = ["src"]` in pytest config makes `securerag` importable without an install step.
 - Embeddings = BAAI/bge-small-en-v1.5 via fastembed (384-dim), NOT Ollama's nomic-embed-text (768-dim):
   the whole retrieval design (Qdrant collection size, chunk payload, "prints 384" check) is built around 384.
 - GitHub: local repo only for now; no remote pushed yet.
