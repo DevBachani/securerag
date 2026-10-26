@@ -36,6 +36,15 @@ class Settings(BaseSettings):
     llm_provider: str = "ollama"
     llm_model: str = "llama3.1:latest"
     llm_temperature: float = 0.0  # low temperature: factual, repeatable answers
+    # Context window for local models. Ollama's default (2048) truncates multi-chunk
+    # RAG context silently; 4096 fits the ~6 chunks the generator sees.
+    llm_context_window: int = 4096
+    # Timeout for a single LLM call (seconds). Generous so slow local models don't
+    # time out mid-generation; cloud providers answer well within it.
+    llm_request_timeout: float = 600.0
+    # How many of the retrieved chunks are actually sent to the generator. Smaller
+    # than RETRIEVAL_TOP_K so prompts stay compact (retrieval still fetches top_k).
+    answer_context_chunks: int = 6
     groq_api_key: str = ""
     google_api_key: str = ""
     ollama_base_url: str = "http://localhost:11434"

@@ -10,6 +10,7 @@ stays cheap and a machine only pays for what it actually uses.
 from __future__ import annotations
 
 import hashlib
+from functools import lru_cache
 from typing import Any
 
 from llama_index.core.embeddings import BaseEmbedding
@@ -129,7 +130,8 @@ def _build_llama_llm(provider: str, model: str, temperature: float, settings: Se
             model=model,
             base_url=settings.ollama_base_url,
             temperature=temperature,
-            request_timeout=120.0,
+            context_window=settings.llm_context_window,
+            request_timeout=settings.llm_request_timeout,
         )
 
     if provider == "groq":
@@ -197,8 +199,13 @@ def get_langchain_llm() -> Any:
 # --------------------------------------------------------------------------- #
 
 
+@lru_cache
 def get_embed_model() -> BaseEmbedding:
-    """Return the embedding model (bge-small, 384-dim) wrapped in the on-disk cache."""
+    """Return the embedding model (bge-small, 384-dim) wrapped in the on-disk cache.
+
+    Cached so the fastembed model is loaded once per process instead of on every
+    query; the on-disk vector cache sits on top of that single instance.
+    """
     s = get_settings()
     from llama_index.embeddings.fastembed import FastEmbedEmbedding
 
