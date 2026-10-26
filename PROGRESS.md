@@ -1,7 +1,7 @@
 # PROGRESS
 
-## Current phase: 1 — Synthetic corpus and manifest
-## Status: in progress
+## Current phase: 2 — Configuration and model providers
+## Status: not started
 
 ## Environment
 - OS / RAM / GPU: Windows 11 Home (10.0.27965) / ~8 GB RAM / no dedicated GPU
@@ -13,6 +13,7 @@
 | Phase | Date | Commit | Notes |
 |---|---|---|---|
 | 0 — Environment setup | 2026-10-26 | chore: project setup, qdrant, smoke test | Smoke test 3/3: LLM OK, embed 384, Qdrant up. Ollama/llama3.1. |
+| 1 — Synthetic corpus and manifest | 2026-10-26 | feat(data): synthetic Acme corpus with ACL manifest | 26 docs (23 md + 3 pdf), manifest + FACTS.md, 55 manifest tests pass. Traps excluded. |
 
 ## Key decisions (and why)
 - LLM = Ollama / llama3.1:latest (local): no API key, no free-tier limits; machine already has it installed.
