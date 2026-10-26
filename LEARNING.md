@@ -11,3 +11,6 @@ _(write your notes here: why checkable facts matter, where real ACLs come from, 
 
 ## Phase 2 — Configuration and model providers
 _(write your notes here: the factory pattern, what backoff protects against, why cache embeddings not answers)_
+
+## Phase 3 — Ingestion pipeline
+_(write your notes here: chunk-size trade-offs, heading-first splitting, payload indexes, idempotency)_
