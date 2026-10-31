@@ -75,3 +75,23 @@ Lessons:
 - passlib is dead (breaks with bcrypt 5); used bcrypt directly.
 
 _(add your own reflection: post-filter danger, top-k with forbidden chunks, Google Drive ACL sync)_
+
+## Phase 7 — Hybrid search (BM25 + dense)
+
+Recreated the collection with named dense + sparse (BM25) vectors; retrieval/hybrid.py queries both
+(each permission-filtered) and fuses with Reciprocal Rank Fusion. Behind HYBRID_ENABLED.
+
+Result (hit_rate@k over all 44 golden questions, quota-free):
+- @12 and @3: dense == hybrid == 1.00 (dense already saturated on a 26-doc corpus).
+- **@1 keyword: dense 0.75 -> hybrid 1.00**. Concrete win: "fix for ERR-6210?" - dense's #1 is the
+  ERR-5002 postmortem (near-duplicate); hybrid's BM25 branch matches the exact code and returns the right doc.
+- leakage_rate stays 0.00 with hybrid (filter applied on BOTH branches).
+
+Lessons:
+- **Embeddings blur rare exact tokens** (ERR-4021/5002/6210 cluster together); BM25's literal match
+  disambiguates. This is the core reason to run hybrid.
+- **RRF fuses by rank, not score** - sidesteps that cosine and BM25 scores aren't comparable.
+- **Metrics can saturate.** hit_rate@12 showed nothing; only hit_rate@1 exposed the difference. Pick a
+  k (and a corpus) where the metric has headroom, or you'll "prove" nothing.
+
+_(add your own reflection: why embeddings miss exact codes, how RRF works, why hybrid may not help a category)_

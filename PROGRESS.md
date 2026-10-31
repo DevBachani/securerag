@@ -1,6 +1,6 @@
 # PROGRESS
 
-## Current phase: 7 — Hybrid search (BM25 + dense)
+## Current phase: 8 — Cross-encoder reranking
 ## Status: not started
 
 ## Environment
@@ -20,6 +20,7 @@
 | 4 — Baseline RAG with citations | 2026-10-26 | feat(rag): baseline dense RAG with citations | Dense retrieve + cited answers via Groq. Baseline: 7/8 answerable correct, 2/2 unanswerable refused, 1 miss (ERR-4021 fix chunk ranked #12). 74 tests. |
 | 5 — Golden eval set + baseline | 2026-10-31 | feat(eval): golden set, ragas + custom metrics, baseline results | 40-question golden set; run_eval.py (4 Ragas + 3 custom). Custom baseline (15Q): hit_rate/citation/refusal = 1.0. Ragas sample (4Q): faithfulness 1.0, ctx_precision 0.83, ctx_recall 0.88. Full Ragas run deferred (Groq daily token cap). |
 | 6 — ACLs + permission-filtered retrieval | 2026-10-31 | feat(security): group ACLs and permission-filtered retrieval with leakage tests | SQLModel users/groups + seed_users; build_filter inside the Qdrant query + defense-in-depth check; 20-question leakage set -> leakage_rate 0.0. 85 tests. |
+| 7 — Hybrid search (BM25 + dense) | 2026-10-31 | feat(retrieval): hybrid BM25 + dense search with RRF | Named dense+sparse vectors, RRF fusion, permission filter on both branches. hit_rate@1 keyword: dense 0.75 -> hybrid 1.00. leakage still 0.0. 89 tests. |
 
 ## Key decisions (and why)
 - LLM = Ollama / llama3.1:latest (local): no API key, no free-tier limits; machine already has it installed.
@@ -53,6 +54,12 @@
 |---|---|---|---|---|---|---|
 | 5 | baseline (Ragas n=4, judge gpt-oss-120b) | 1.00 | n/a* | 0.83 | 0.88 | n/a (Phase 6) |
 | 6 | permission-filtered (leakage set, n=20) | - | - | - | - | **0.00** |
+
+Phase 7 retrieval comparison (hit_rate@k, quota-free, all 44 golden questions):
+- @12 and @3: dense == hybrid == 1.00 everywhere (dense saturated on this small corpus).
+- **@1 keyword: dense 0.75 -> hybrid 1.00**; @1 overall: dense 0.95 -> hybrid 1.00.
+- Example only hybrid gets at #1: "fix for ERR-6210" (dense returns the ERR-5002 doc; BM25 matches the exact code).
+- leakage_rate stays **0.00** with hybrid (filter on both dense and sparse branches).
 
 \* answer_relevancy came back n/a (Ragas question-generation step returned no output for these samples).
 Custom metrics, baseline (n=15, all categories): hit_rate@k **1.00**, citation_accuracy **1.00**, refusal_accuracy **1.00**.

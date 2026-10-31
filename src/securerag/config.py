@@ -53,6 +53,7 @@ class Settings(BaseSettings):
 
     # --- Embeddings / reranker ---
     embed_model: str = "BAAI/bge-small-en-v1.5"
+    sparse_embed_model: str = "Qdrant/bm25"  # sparse/BM25 vectors for hybrid search
     embed_cache_dir: str = ".embeddings_cache"
     rerank_model: str = "BAAI/bge-reranker-base"
     rerank_top_n: int = 4

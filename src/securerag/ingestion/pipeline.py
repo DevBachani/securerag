@@ -18,12 +18,15 @@ from llama_index.core.schema import BaseNode, MetadataMode
 from qdrant_client import QdrantClient, models
 
 from ..config import get_settings
-from ..providers import get_embed_model
+from ..providers import get_embed_model, get_sparse_embed_model
 from .chunker import chunk_documents, section_of
 from .loader import load_documents
 
 # bge-small-en-v1.5 output width.
 EMBED_DIM = 384
+# Named vectors in the collection: a dense semantic vector and a sparse BM25 vector.
+DENSE_VECTOR = "dense"
+SPARSE_VECTOR = "sparse"
 # Fixed namespace so UUID5 chunk ids are stable across machines and runs.
 _NAMESPACE = uuid.UUID("5f2b1c4a-6d3e-4a1b-9c7d-8e0f1a2b3c4d")
 # Payload fields that get an index so filtering on them is fast (Phase 6).
@@ -44,7 +47,13 @@ def ensure_collection(client: QdrantClient, collection: str, reset: bool) -> Non
     if not client.collection_exists(collection):
         client.create_collection(
             collection_name=collection,
-            vectors_config=models.VectorParams(size=EMBED_DIM, distance=models.Distance.COSINE),
+            vectors_config={
+                DENSE_VECTOR: models.VectorParams(size=EMBED_DIM, distance=models.Distance.COSINE),
+            },
+            # BM25 sparse vectors; IDF is applied by Qdrant at query time.
+            sparse_vectors_config={
+                SPARSE_VECTOR: models.SparseVectorParams(modifier=models.Modifier.IDF),
+            },
         )
         for field in _INDEXED_KEYWORDS:
             client.create_payload_index(
@@ -102,6 +111,7 @@ def ingest(reset: bool = False, manifest_path: str | None = None) -> dict[str, i
     ensure_collection(client, settings.qdrant_collection, reset)
 
     embed_model = get_embed_model()
+    sparse_model = get_sparse_embed_model()
     documents = load_documents(manifest_path)
     nodes = chunk_documents(documents)
     now = datetime.now(UTC).isoformat()
@@ -114,12 +124,18 @@ def ingest(reset: bool = False, manifest_path: str | None = None) -> dict[str, i
         per_doc_counter[doc_id] = chunk_index + 1
 
         text = node.get_content(metadata_mode=MetadataMode.NONE)
-        vector = embed_model.get_text_embedding(text)
+        dense = embed_model.get_text_embedding(text)
+        sparse = next(sparse_model.embed([text]))
         point_id = _point_id(doc_id, chunk_index)
         points.append(
             models.PointStruct(
                 id=point_id,
-                vector=vector,
+                vector={
+                    DENSE_VECTOR: dense,
+                    SPARSE_VECTOR: models.SparseVector(
+                        indices=sparse.indices.tolist(), values=sparse.values.tolist()
+                    ),
+                },
                 payload=_build_payload(node, text, point_id, chunk_index, now),
             )
         )

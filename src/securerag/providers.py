@@ -213,6 +213,18 @@ def get_embed_model() -> BaseEmbedding:
     return CachingEmbedding(inner=inner, cache_dir=s.embed_cache_dir)
 
 
+@lru_cache
+def get_sparse_embed_model() -> Any:
+    """Return the sparse BM25 embedding model (fastembed) for hybrid search.
+
+    Cached so the model loads once per process. Used to produce the sparse vector
+    stored per chunk and the sparse query vector at search time.
+    """
+    from fastembed import SparseTextEmbedding
+
+    return SparseTextEmbedding(model_name=get_settings().sparse_embed_model)
+
+
 def get_reranker() -> Any:
     """Build the cross-encoder reranker. Imported lazily; its heavy deps land in Phase 8."""
     s = get_settings()

@@ -267,6 +267,58 @@ def run_leakage(config_name: str) -> dict:
     return payload
 
 
+def run_retrieval_only(config_name: str) -> dict:
+    """Score hit_rate@k over the golden set from RETRIEVAL alone (no LLM).
+
+    Used to compare retrieval configs (dense vs hybrid) quota-free. Reports overall
+    hit_rate and a per-category breakdown so keyword gains are visible.
+    """
+    settings = get_settings()
+    rows = load_golden(None, None)
+    per_question = []
+    for row in rows:
+        principal = load_principal(row["user_id"])
+        retrieved_ids = [r.doc_id for r in retrieve(row["question"], principal)]
+        per_question.append(
+            {
+                "id": row["id"],
+                "category": row["category"],
+                "question": row["question"],
+                "user_id": row["user_id"],
+                "retrieved_doc_ids": retrieved_ids,
+                "reference_doc_ids": row["reference_doc_ids"],
+                "hit_rate": hit_rate(retrieved_ids, row["reference_doc_ids"]),
+            }
+        )
+
+    categories = sorted({p["category"] for p in per_question})
+    by_category = {
+        cat: mean_ignoring_none([p["hit_rate"] for p in per_question if p["category"] == cat])
+        for cat in categories
+    }
+    overall = mean_ignoring_none([p["hit_rate"] for p in per_question])
+
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = RESULTS_DIR / f"{datetime.now(UTC).strftime('%Y%m%d')}_{config_name}.json"
+    payload = {
+        "config_name": config_name,
+        "timestamp": datetime.now(UTC).isoformat(),
+        "params": {
+            "hybrid_enabled": settings.hybrid_enabled,
+            "retrieval_top_k": settings.retrieval_top_k,
+        },
+        "averages": {"hit_rate": overall, "hit_rate_by_category": by_category},
+        "per_question": per_question,
+    }
+    out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print(f"Saved: {out_path.relative_to(REPO)}")
+    print(f"hybrid_enabled={settings.hybrid_enabled}  overall hit_rate={overall:.3f}")
+    for cat in categories:
+        value = by_category[cat]
+        print(f"  {cat:12s}: {value:.3f}" if value is not None else f"  {cat:12s}: n/a")
+    return payload
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the golden-set evaluation.")
     parser.add_argument("--config-name", default="baseline", help="Label for this run.")
@@ -284,11 +336,19 @@ def main() -> None:
         action="store_true",
         help="Run the leakage set and report leakage_rate (retrieval-only, no LLM).",
     )
+    parser.add_argument(
+        "--retrieval-only",
+        action="store_true",
+        help="Score hit_rate@k over the golden set from retrieval only (no LLM).",
+    )
     args = parser.parse_args()
 
     load_dotenv()
     if args.leakage:
         run_leakage(args.config_name if args.config_name != "baseline" else "leakage")
+        return
+    if args.retrieval_only:
+        run_retrieval_only(args.config_name)
         return
 
     settings = get_settings()

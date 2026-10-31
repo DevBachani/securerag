@@ -1,6 +1,6 @@
 {
   "config_name": "leakage",
-  "timestamp": "2026-10-31T16:17:27.704510+00:00",
+  "timestamp": "2026-10-31T17:45:33.903491+00:00",
   "averages": {
     "leakage_rate": 0.0
   },
@@ -14,6 +14,7 @@
       ],
       "retrieved_doc_ids": [
         "pub-it-security",
+        "pub-office-locations",
         "pub-benefits",
         "pub-code-of-conduct",
         "pub-benefits",
@@ -23,8 +24,7 @@
         "pub-it-security",
         "pub-onboarding",
         "pub-onboarding",
-        "pub-code-of-conduct",
-        "pub-office-locations"
+        "pub-code-of-conduct"
       ],
       "leak": 0.0
     },
@@ -37,8 +37,8 @@
       ],
       "retrieved_doc_ids": [
         "pub-leave-policy",
-        "pub-benefits",
         "pub-leave-policy",
+        "pub-benefits",
         "pub-office-locations",
         "pub-office-locations",
         "pub-holidays-2026",
@@ -83,17 +83,17 @@
       ],
       "retrieved_doc_ids": [
         "pub-benefits",
+        "pub-code-of-conduct",
         "pub-benefits",
+        "pub-it-security",
         "pub-holidays-2026",
+        "pub-it-security",
         "pub-onboarding",
         "pub-code-of-conduct",
         "pub-onboarding",
         "pub-office-locations",
         "pub-office-locations",
-        "pub-code-of-conduct",
-        "pub-leave-policy",
-        "pub-travel-policy",
-        "pub-office-locations"
+        "pub-code-of-conduct"
       ],
       "leak": 0.0
     },
@@ -106,10 +106,10 @@
       ],
       "retrieved_doc_ids": [
         "pub-it-security",
+        "pub-code-of-conduct",
         "pub-travel-policy",
         "pub-code-of-conduct",
         "pub-benefits",
-        "pub-code-of-conduct",
         "pub-code-of-conduct",
         "pub-onboarding",
         "pub-onboarding",
@@ -128,18 +128,18 @@
         "hr-salary-bands"
       ],
       "retrieved_doc_ids": [
+        "eng-api-standards",
+        "eng-oncall-runbook",
         "pub-benefits",
         "pub-benefits",
+        "pub-it-security",
         "pub-leave-policy",
         "pub-leave-policy",
         "pub-code-of-conduct",
         "pub-onboarding",
         "pub-benefits",
         "pub-office-locations",
-        "eng-api-standards",
-        "pub-leave-policy",
-        "pub-travel-policy",
-        "eng-oncall-runbook"
+        "pub-leave-policy"
       ],
       "leak": 0.0
     },
@@ -198,17 +198,17 @@
       ],
       "retrieved_doc_ids": [
         "eng-architecture",
-        "pub-office-locations",
         "eng-deployment",
-        "eng-oncall-runbook",
-        "pub-onboarding",
         "pub-benefits",
-        "pub-office-locations",
-        "eng-pm-payments",
-        "pub-office-locations",
+        "eng-oncall-runbook",
         "pub-travel-policy",
+        "pub-office-locations",
+        "eng-api-standards",
         "eng-pm-auth",
-        "pub-travel-policy"
+        "eng-pm-payments",
+        "eng-oncall-runbook",
+        "eng-oncall-runbook",
+        "pub-onboarding"
       ],
       "leak": 0.0
     },
@@ -220,12 +220,12 @@
         "hr-salary-bands"
       ],
       "retrieved_doc_ids": [
+        "pub-it-security",
         "pub-benefits",
         "fin-q2-budget",
         "fin-vendor-contracts",
         "pub-code-of-conduct",
         "pub-benefits",
-        "pub-it-security",
         "pub-code-of-conduct",
         "pub-leave-policy",
         "pub-benefits",
@@ -244,6 +244,7 @@
       ],
       "retrieved_doc_ids": [
         "pub-it-security",
+        "pub-holidays-2026",
         "pub-code-of-conduct",
         "pub-onboarding",
         "pub-it-security",
@@ -253,8 +254,7 @@
         "fin-expense-limits",
         "pub-office-locations",
         "pub-code-of-conduct",
-        "fin-vendor-contracts",
-        "fin-q2-budget"
+        "fin-vendor-contracts"
       ],
       "leak": 0.0
     },
@@ -266,12 +266,12 @@
         "lead-restructuring"
       ],
       "retrieved_doc_ids": [
+        "pub-leave-policy",
         "pub-office-locations",
         "fin-q2-budget",
         "pub-leave-policy",
         "pub-benefits",
         "pub-office-locations",
-        "pub-leave-policy",
         "pub-onboarding",
         "pub-benefits",
         "pub-office-locations",
@@ -290,11 +290,11 @@
       ],
       "retrieved_doc_ids": [
         "hr-hiring-plan",
+        "hr-promotion-criteria",
+        "pub-benefits",
+        "hr-hiring-plan",
         "hr-salary-bands",
         "hr-hiring-plan",
-        "hr-hiring-plan",
-        "pub-benefits",
-        "hr-promotion-criteria",
         "hr-hiring-plan",
         "pub-onboarding",
         "pub-travel-policy",
@@ -312,18 +312,18 @@
         "lead-ma-shortlist"
       ],
       "retrieved_doc_ids": [
-        "hr-hiring-plan",
-        "hr-hiring-plan",
         "hr-manager-handbook",
+        "hr-hiring-plan",
+        "hr-hiring-plan",
+        "hr-hiring-plan",
+        "hr-promotion-criteria",
         "pub-benefits",
+        "pub-it-security",
         "pub-benefits",
         "hr-manager-handbook",
         "pub-code-of-conduct",
         "hr-promotion-criteria",
-        "hr-manager-handbook",
-        "hr-hiring-plan",
-        "pub-onboarding",
-        "pub-onboarding"
+        "hr-manager-handbook"
       ],
       "leak": 0.0
     },
@@ -336,17 +336,17 @@
       ],
       "retrieved_doc_ids": [
         "pub-it-security",
+        "pub-office-locations",
         "pub-it-security",
         "pub-it-security",
+        "hr-promotion-criteria",
         "hr-manager-handbook",
         "pub-onboarding",
         "hr-manager-handbook",
         "hr-perf-review",
         "hr-manager-handbook",
         "pub-benefits",
-        "pub-it-security",
-        "pub-onboarding",
-        "pub-office-locations"
+        "pub-it-security"
       ],
       "leak": 0.0
     },
@@ -359,17 +359,17 @@
       ],
       "retrieved_doc_ids": [
         "hr-manager-handbook",
-        "hr-manager-handbook",
+        "hr-hiring-plan",
         "hr-hiring-plan",
         "pub-leave-policy",
         "hr-hiring-plan",
+        "hr-manager-handbook",
+        "hr-hiring-plan",
+        "pub-leave-policy",
         "pub-benefits",
+        "hr-perf-review",
         "hr-manager-handbook",
-        "pub-office-locations",
-        "hr-salary-bands",
-        "pub-leave-policy",
-        "hr-manager-handbook",
-        "hr-promotion-criteria"
+        "pub-office-locations"
       ],
       "leak": 0.0
     },
@@ -383,16 +383,16 @@
       "retrieved_doc_ids": [
         "hr-hiring-plan",
         "pub-benefits",
-        "hr-hiring-plan",
         "hr-perf-review",
-        "pub-holidays-2026",
-        "pub-it-security",
-        "pub-office-locations",
         "hr-promotion-criteria",
         "pub-onboarding",
-        "pub-code-of-conduct",
         "pub-it-security",
-        "pub-code-of-conduct"
+        "hr-hiring-plan",
+        "pub-code-of-conduct",
+        "pub-code-of-conduct",
+        "pub-code-of-conduct",
+        "pub-holidays-2026",
+        "pub-office-locations"
       ],
       "leak": 0.0
     },
@@ -405,16 +405,16 @@
       ],
       "retrieved_doc_ids": [
         "hr-promotion-criteria",
+        "hr-manager-handbook",
         "hr-promotion-criteria",
         "hr-promotion-criteria",
-        "hr-manager-handbook",
-        "pub-benefits",
-        "hr-manager-handbook",
-        "pub-benefits",
-        "hr-manager-handbook",
         "hr-promotion-criteria",
         "eng-oncall-runbook",
-        "pub-leave-policy",
+        "pub-benefits",
+        "hr-manager-handbook",
+        "pub-it-security",
+        "pub-benefits",
+        "hr-manager-handbook",
         "hr-promotion-criteria"
       ],
       "leak": 0.0
@@ -428,7 +428,9 @@
       ],
       "retrieved_doc_ids": [
         "eng-pm-payments",
+        "pub-onboarding",
         "eng-pm-payments",
+        "hr-promotion-criteria",
         "eng-pm-payments",
         "pub-benefits",
         "pub-code-of-conduct",
@@ -436,8 +438,6 @@
         "pub-onboarding",
         "pub-onboarding",
         "hr-manager-handbook",
-        "hr-manager-handbook",
-        "hr-promotion-criteria",
         "hr-manager-handbook"
       ],
       "leak": 0.0
@@ -450,8 +450,8 @@
         "hr-salary-bands"
       ],
       "retrieved_doc_ids": [
-        "pub-benefits",
         "pub-it-security",
+        "pub-benefits",
         "pub-benefits",
         "pub-code-of-conduct",
         "pub-onboarding",

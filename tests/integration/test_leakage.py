@@ -45,3 +45,9 @@ def test_same_question_differs_by_user():
     ceo_docs = {r.doc_id for r in retrieve(question, CEO, top_k=12)}
     assert "lead-restructuring" in ceo_docs
     assert "lead-restructuring" not in intern_docs
+
+
+def test_hybrid_retrieves_exact_error_code():
+    # Hybrid (BM25 branch) should surface the postmortem for a rare exact token.
+    results = retrieve("ERR-4021", CEO, top_k=12)
+    assert any(r.doc_id == "eng-pm-payments" for r in results)

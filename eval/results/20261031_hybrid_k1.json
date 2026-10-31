@@ -1,0 +1,590 @@
+{
+  "config_name": "hybrid_k1",
+  "timestamp": "2026-10-31T17:44:26.493685+00:00",
+  "params": {
+    "hybrid_enabled": true,
+    "retrieval_top_k": 1
+  },
+  "averages": {
+    "hit_rate": 1.0,
+    "hit_rate_by_category": {
+      "factual": 1.0,
+      "keyword": 1.0,
+      "multi_hop": 1.0,
+      "table": 1.0,
+      "unanswerable": null
+    }
+  },
+  "per_question": [
+    {
+      "id": "f01",
+      "category": "factual",
+      "question": "How many earned leaves do employees get per year?",
+      "user_id": "u_int",
+      "retrieved_doc_ids": [
+        "pub-leave-policy"
+      ],
+      "reference_doc_ids": [
+        "pub-leave-policy"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f02",
+      "category": "factual",
+      "question": "How many casual leaves are employees entitled to per year?",
+      "user_id": "u_eng",
+      "retrieved_doc_ids": [
+        "pub-leave-policy"
+      ],
+      "reference_doc_ids": [
+        "pub-leave-policy"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f03",
+      "category": "factual",
+      "question": "How long is maternity leave at Acme?",
+      "user_id": "u_hre",
+      "retrieved_doc_ids": [
+        "pub-leave-policy"
+      ],
+      "reference_doc_ids": [
+        "pub-leave-policy"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f04",
+      "category": "factual",
+      "question": "What is the domestic per diem for travel?",
+      "user_id": "u_int",
+      "retrieved_doc_ids": [
+        "pub-travel-policy"
+      ],
+      "reference_doc_ids": [
+        "pub-travel-policy"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f05",
+      "category": "factual",
+      "question": "What is the hotel cap per night in metro cities?",
+      "user_id": "u_ceo",
+      "retrieved_doc_ids": [
+        "pub-travel-policy"
+      ],
+      "reference_doc_ids": [
+        "pub-travel-policy"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f06",
+      "category": "factual",
+      "question": "What is the minimum password length?",
+      "user_id": "u_eng",
+      "retrieved_doc_ids": [
+        "pub-it-security"
+      ],
+      "reference_doc_ids": [
+        "pub-it-security"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f07",
+      "category": "factual",
+      "question": "How many data classification levels does Acme use?",
+      "user_id": "u_ceo",
+      "retrieved_doc_ids": [
+        "pub-it-security"
+      ],
+      "reference_doc_ids": [
+        "pub-it-security"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f08",
+      "category": "factual",
+      "question": "What is the group health insurance family floater amount?",
+      "user_id": "u_int",
+      "retrieved_doc_ids": [
+        "pub-benefits"
+      ],
+      "reference_doc_ids": [
+        "pub-benefits"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f09",
+      "category": "factual",
+      "question": "What is the annual wellness allowance?",
+      "user_id": "u_ceo",
+      "retrieved_doc_ids": [
+        "pub-benefits"
+      ],
+      "reference_doc_ids": [
+        "pub-benefits"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f10",
+      "category": "factual",
+      "question": "How long is the probation period for new hires?",
+      "user_id": "u_int",
+      "retrieved_doc_ids": [
+        "pub-onboarding"
+      ],
+      "reference_doc_ids": [
+        "pub-onboarding"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f11",
+      "category": "factual",
+      "question": "What is the seat capacity of the Bengaluru headquarters?",
+      "user_id": "u_hre",
+      "retrieved_doc_ids": [
+        "pub-office-locations"
+      ],
+      "reference_doc_ids": [
+        "pub-office-locations"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f12",
+      "category": "factual",
+      "question": "Above what value must gifts from business partners be declined or reported?",
+      "user_id": "u_ceo",
+      "retrieved_doc_ids": [
+        "pub-code-of-conduct"
+      ],
+      "reference_doc_ids": [
+        "pub-code-of-conduct"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f13",
+      "category": "factual",
+      "question": "How many performance review cycles are there per year and when?",
+      "user_id": "u_hrm",
+      "retrieved_doc_ids": [
+        "hr-perf-review"
+      ],
+      "reference_doc_ids": [
+        "hr-perf-review"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f14",
+      "category": "factual",
+      "question": "What triggers a Performance Improvement Plan (PIP)?",
+      "user_id": "u_hre",
+      "retrieved_doc_ids": [
+        "hr-perf-review"
+      ],
+      "reference_doc_ids": [
+        "hr-perf-review"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f15",
+      "category": "factual",
+      "question": "What is the FY27 net headcount growth target?",
+      "user_id": "u_hrm",
+      "retrieved_doc_ids": [
+        "hr-hiring-plan"
+      ],
+      "reference_doc_ids": [
+        "hr-hiring-plan"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f16",
+      "category": "factual",
+      "question": "What is the FY27 recruitment budget?",
+      "user_id": "u_hrm",
+      "retrieved_doc_ids": [
+        "hr-hiring-plan"
+      ],
+      "reference_doc_ids": [
+        "hr-hiring-plan"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f17",
+      "category": "factual",
+      "question": "What is the target span of control for a manager?",
+      "user_id": "u_engm",
+      "retrieved_doc_ids": [
+        "hr-manager-handbook"
+      ],
+      "reference_doc_ids": [
+        "hr-manager-handbook"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f18",
+      "category": "factual",
+      "question": "What is Acme's annual AWS spend?",
+      "user_id": "u_fin",
+      "retrieved_doc_ids": [
+        "fin-vendor-contracts"
+      ],
+      "reference_doc_ids": [
+        "fin-vendor-contracts"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f19",
+      "category": "factual",
+      "question": "What is the platform's uptime SLA target?",
+      "user_id": "u_eng",
+      "retrieved_doc_ids": [
+        "eng-architecture"
+      ],
+      "reference_doc_ids": [
+        "eng-architecture"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "f20",
+      "category": "factual",
+      "question": "What was Q2 FY27 revenue?",
+      "user_id": "u_ceo",
+      "retrieved_doc_ids": [
+        "lead-board-notes"
+      ],
+      "reference_doc_ids": [
+        "lead-board-notes"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "t01",
+      "category": "table",
+      "question": "What is the salary band range (minimum to maximum) for level L4?",
+      "user_id": "u_hrm",
+      "retrieved_doc_ids": [
+        "hr-salary-bands"
+      ],
+      "reference_doc_ids": [
+        "hr-salary-bands"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "t02",
+      "category": "table",
+      "question": "What is the maximum salary for level L7?",
+      "user_id": "u_hrm",
+      "retrieved_doc_ids": [
+        "hr-salary-bands"
+      ],
+      "reference_doc_ids": [
+        "hr-salary-bands"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "t03",
+      "category": "table",
+      "question": "What is the minimum salary for level L1?",
+      "user_id": "u_ceo",
+      "retrieved_doc_ids": [
+        "hr-salary-bands"
+      ],
+      "reference_doc_ids": [
+        "hr-salary-bands"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "t04",
+      "category": "table",
+      "question": "What is the total Q2 FY27 budget?",
+      "user_id": "u_fin",
+      "retrieved_doc_ids": [
+        "fin-q2-budget"
+      ],
+      "reference_doc_ids": [
+        "fin-q2-budget"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "t05",
+      "category": "table",
+      "question": "What is the Engineering department's Q2 FY27 budget?",
+      "user_id": "u_fin",
+      "retrieved_doc_ids": [
+        "fin-q2-budget"
+      ],
+      "reference_doc_ids": [
+        "fin-q2-budget"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "t06",
+      "category": "table",
+      "question": "What is a Manager's single-transaction expense approval limit?",
+      "user_id": "u_fin",
+      "retrieved_doc_ids": [
+        "fin-expense-limits"
+      ],
+      "reference_doc_ids": [
+        "fin-expense-limits"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "m01",
+      "category": "multi_hop",
+      "question": "What performance rating makes an employee promotion-eligible, and what is the promotion budget cap?",
+      "user_id": "u_hrm",
+      "retrieved_doc_ids": [
+        "hr-promotion-criteria"
+      ],
+      "reference_doc_ids": [
+        "hr-perf-review",
+        "hr-promotion-criteria"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "m02",
+      "category": "multi_hop",
+      "question": "How many engineers will Acme hire in FY27, and what is the Engineering Q2 budget?",
+      "user_id": "u_ceo",
+      "retrieved_doc_ids": [
+        "hr-hiring-plan"
+      ],
+      "reference_doc_ids": [
+        "hr-hiring-plan",
+        "fin-q2-budget"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "m03",
+      "category": "multi_hop",
+      "question": "What is the SEV1 response target, and which error-code incident had a 42-minute outage?",
+      "user_id": "u_eng",
+      "retrieved_doc_ids": [
+        "eng-oncall-runbook"
+      ],
+      "reference_doc_ids": [
+        "eng-oncall-runbook",
+        "eng-pm-payments"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "m04",
+      "category": "multi_hop",
+      "question": "What are the expense approval limits for a Manager and for a Director?",
+      "user_id": "u_ceo",
+      "retrieved_doc_ids": [
+        "fin-expense-limits"
+      ],
+      "reference_doc_ids": [
+        "hr-manager-handbook",
+        "fin-expense-limits"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "m05",
+      "category": "multi_hop",
+      "question": "What is the domestic travel per diem and the monthly meal card value?",
+      "user_id": "u_int",
+      "retrieved_doc_ids": [
+        "pub-travel-policy"
+      ],
+      "reference_doc_ids": [
+        "pub-travel-policy",
+        "pub-benefits"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "m06",
+      "category": "multi_hop",
+      "question": "How many microservices does Acme run, and which error-code incident was caused by a missing database index?",
+      "user_id": "u_eng",
+      "retrieved_doc_ids": [
+        "eng-architecture"
+      ],
+      "reference_doc_ids": [
+        "eng-architecture",
+        "eng-pm-search"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "k01",
+      "category": "keyword",
+      "question": "What was the root cause of incident ERR-4021?",
+      "user_id": "u_eng",
+      "retrieved_doc_ids": [
+        "eng-pm-payments"
+      ],
+      "reference_doc_ids": [
+        "eng-pm-payments"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "k02",
+      "category": "keyword",
+      "question": "What caused incident ERR-5002?",
+      "user_id": "u_eng",
+      "retrieved_doc_ids": [
+        "eng-pm-auth"
+      ],
+      "reference_doc_ids": [
+        "eng-pm-auth"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "k03",
+      "category": "keyword",
+      "question": "What was the fix for incident ERR-6210?",
+      "user_id": "u_eng",
+      "retrieved_doc_ids": [
+        "eng-pm-search"
+      ],
+      "reference_doc_ids": [
+        "eng-pm-search"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "k04",
+      "category": "keyword",
+      "question": "What format do Acme API error codes use?",
+      "user_id": "u_eng",
+      "retrieved_doc_ids": [
+        "eng-api-standards"
+      ],
+      "reference_doc_ids": [
+        "eng-api-standards"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "k05",
+      "category": "keyword",
+      "question": "Which AWS region does the platform run in?",
+      "user_id": "u_eng",
+      "retrieved_doc_ids": [
+        "eng-architecture"
+      ],
+      "reference_doc_ids": [
+        "eng-architecture"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "k06",
+      "category": "keyword",
+      "question": "What are the standard vendor payment terms?",
+      "user_id": "u_fin",
+      "retrieved_doc_ids": [
+        "fin-vendor-contracts"
+      ],
+      "reference_doc_ids": [
+        "fin-vendor-contracts"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "k07",
+      "category": "keyword",
+      "question": "Which tool does Acme use for on-call paging?",
+      "user_id": "u_eng",
+      "retrieved_doc_ids": [
+        "eng-oncall-runbook"
+      ],
+      "reference_doc_ids": [
+        "eng-oncall-runbook"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "k08",
+      "category": "keyword",
+      "question": "What version path do Acme APIs start at?",
+      "user_id": "u_eng",
+      "retrieved_doc_ids": [
+        "eng-api-standards"
+      ],
+      "reference_doc_ids": [
+        "eng-api-standards"
+      ],
+      "hit_rate": 1.0
+    },
+    {
+      "id": "u01",
+      "category": "unanswerable",
+      "question": "What is the CEO's personal mobile phone number?",
+      "user_id": "u_ceo",
+      "retrieved_doc_ids": [
+        "lead-board-notes"
+      ],
+      "reference_doc_ids": [],
+      "hit_rate": null
+    },
+    {
+      "id": "u02",
+      "category": "unanswerable",
+      "question": "What is Acme's stock ticker symbol on the NYSE?",
+      "user_id": "u_ceo",
+      "retrieved_doc_ids": [
+        "pub-onboarding"
+      ],
+      "reference_doc_ids": [],
+      "hit_rate": null
+    },
+    {
+      "id": "u03",
+      "category": "unanswerable",
+      "question": "How many vacation days do contractors in Acme's US office get?",
+      "user_id": "u_ceo",
+      "retrieved_doc_ids": [
+        "pub-office-locations"
+      ],
+      "reference_doc_ids": [],
+      "hit_rate": null
+    },
+    {
+      "id": "u04",
+      "category": "unanswerable",
+      "question": "What is the dental insurance coverage amount?",
+      "user_id": "u_ceo",
+      "retrieved_doc_ids": [
+        "pub-benefits"
+      ],
+      "reference_doc_ids": [],
+      "hit_rate": null
+    }
+  ]
+}
