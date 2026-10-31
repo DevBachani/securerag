@@ -21,6 +21,7 @@ from ..config import get_settings
 from ..providers import get_embed_model, get_sparse_embed_model
 from .chunker import chunk_documents, section_of
 from .loader import load_documents
+from .pii import redact
 
 # bge-small-en-v1.5 output width.
 EMBED_DIM = 384
@@ -104,6 +105,23 @@ def _batched(items: list[Any], size: int) -> Iterator[list[Any]]:
         yield items[start : start + size]
 
 
+def redact_documents(documents: list) -> list:
+    """Redact PII in each Document's text (before chunking) and flag it.
+
+    Sets metadata['pii_redacted'] so the chunk payload records whether redaction
+    removed anything. No-op (flag False) when PII redaction is disabled.
+    """
+    enabled = get_settings().pii_redaction_enabled
+    for document in documents:
+        if enabled:
+            redacted, found = redact(document.get_content(metadata_mode=MetadataMode.NONE))
+            document.set_content(redacted)
+            document.metadata["pii_redacted"] = found
+        else:
+            document.metadata["pii_redacted"] = False
+    return documents
+
+
 def build_points(nodes: list[BaseNode]) -> list[models.PointStruct]:
     """Embed nodes (dense + sparse) and build Qdrant points with ACL payloads.
 
@@ -152,7 +170,7 @@ def ingest(reset: bool = False, manifest_path: str | None = None) -> dict[str, i
     client = get_qdrant_client()
     ensure_collection(client, settings.qdrant_collection, reset)
 
-    documents = load_documents(manifest_path)
+    documents = redact_documents(load_documents(manifest_path))
     nodes = chunk_documents(documents)
     upsert_points(client, settings.qdrant_collection, build_points(nodes))
 

@@ -27,7 +27,13 @@ from ..db.models import IngestState
 from ..db.session import get_session, init_db
 from .chunker import chunk_documents
 from .loader import _repo_root, load_documents, load_manifest, superseded_doc_ids
-from .pipeline import build_points, ensure_collection, get_qdrant_client, upsert_points
+from .pipeline import (
+    build_points,
+    ensure_collection,
+    get_qdrant_client,
+    redact_documents,
+    upsert_points,
+)
 
 # Manifest-derived payload fields that can change without the file changing.
 _META_FIELDS = (
@@ -151,7 +157,8 @@ def sync(manifest_path: str | None = None) -> dict[str, int]:
 
         # Re-embed the new/changed docs in one batch.
         if to_embed:
-            nodes = chunk_documents(load_documents(manifest_path, only_doc_ids=to_embed))
+            docs = redact_documents(load_documents(manifest_path, only_doc_ids=to_embed))
+            nodes = chunk_documents(docs)
             upsert_points(client, collection, build_points(nodes))
             _write_state(session, to_embed, entries, superseded, corpus, _chunk_counts(nodes))
 
@@ -181,7 +188,7 @@ def reset_state(manifest_path: str | None = None) -> None:
     corpus = _repo_root() / manifest.get("corpus_root", "data/corpus")
     superseded = superseded_doc_ids(manifest)
     entries = {e["doc_id"]: e for e in manifest["documents"]}
-    counts = _chunk_counts(chunk_documents(load_documents(manifest_path)))
+    counts = _chunk_counts(chunk_documents(redact_documents(load_documents(manifest_path))))
 
     with get_session() as session:
         for state in session.exec(select(IngestState)).all():

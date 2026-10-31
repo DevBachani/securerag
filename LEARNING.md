@@ -134,3 +134,23 @@ Lessons:
 - Two hashes separate concerns: content_hash -> re-embed; meta_hash -> cheap payload update.
 
 _(add your own reflection: hash vs mtime, security risk of unsynced ACLs, Google Drive change feed)_
+
+## Phase 10 — PII redaction at ingestion
+
+Added ingestion/pii.py (regex recognizers: EMAIL, +91 PHONE, AADHAAR, PAN) run on each document's text
+BEFORE chunking/embedding; chunks carry pii_redacted. Added the disciplinary-log trap with fake PII.
+Policy: keep names (needed for HR, protected by ACL), redact contact/ID numbers everywhere.
+
+Verified: 0 planted PII tokens across all 132 chunks; budget "36 crore" intact; 16 chunks flagged redacted.
+119 tests.
+
+Decisions / lessons:
+- **Regex over Presidio (rule #10):** since we keep names and only redact regex-detectable IDs/contacts,
+  heavy spaCy NER adds nothing - and it's a big install on 8 GB. Documented tradeoff.
+- **Redact at ingestion, not answer time:** what's never stored can't leak (to the vector DB, the external
+  LLM, logs, or caches). Answer-time redaction trusts a scrub step on every path, every request.
+- **False positives destroy facts:** over-redaction (e.g. a budget matched as <AADHAAR>) silently makes a
+  question unanswerable - patterns must be precise; tests assert budgets/dates/codes survive.
+- Side effect: org emails (ethics@/secops@) are redacted too - acceptable; we just don't embed any email.
+
+_(add your own reflection: redact at ingestion vs answer time, false positives, ACLs+redaction defense in depth)_

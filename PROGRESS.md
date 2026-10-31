@@ -1,6 +1,6 @@
 # PROGRESS
 
-## Current phase: 10 — PII redaction at ingestion
+## Current phase: 11 — LangGraph agent: state, router and core graph
 ## Status: not started
 
 ## Environment
@@ -23,6 +23,7 @@
 | 7 — Hybrid search (BM25 + dense) | 2026-10-31 | feat(retrieval): hybrid BM25 + dense search with RRF | Named dense+sparse vectors, RRF fusion, permission filter on both branches. hit_rate@1 keyword: dense 0.75 -> hybrid 1.00. leakage still 0.0. 89 tests. |
 | 8 — Cross-encoder reranking | 2026-10-31 | feat(retrieval): cross-encoder reranking with latency measurement | bge-reranker-base via fastembed ONNX (no PyTorch). Retrieve wide -> rerank -> top_n. hit_rate stays 1.0 (saturated); rerank adds ~1.3-2.8s median CPU latency. Best pool=8. 91 tests. |
 | 9 — Incremental sync + versioning | 2026-10-31 | feat(ingestion): incremental sync, deletions, versioning and ACL updates | ingest_state (SHA-256 content_hash + meta_hash); sync only re-embeds changed files, deletes removed, updates payload on ACL change. travel v1 trap, is_current filter. ingest.py default=sync. 99 tests. |
+| 10 — PII redaction at ingestion | 2026-10-31 | feat(governance): PII redaction with Indian ID recognizers | Regex redactor (EMAIL/+91 PHONE/AADHAAR/PAN) runs before embedding; pii_redacted flag. disciplinary-log trap. 0 planted PII across 132 chunks; budgets intact. 119 tests. |
 
 ## Key decisions (and why)
 - LLM = Ollama / llama3.1:latest (local): no API key, no free-tier limits; machine already has it installed.
@@ -52,6 +53,9 @@
 - Phase 9: `scripts/ingest.py` default is now incremental SYNC; `--reset` does a full rebuild.
   Change detection uses content_hash (file bytes) for re-embed and meta_hash (ACL/version fields) for
   in-place payload updates. Retrieval filters is_current=true so superseded versions are never served.
+- Phase 10 (rule #10): used a regex redactor instead of Microsoft Presidio. The policy keeps names and
+  redacts only contact/ID PII (all regex-detectable), so Presidio's heavy spaCy NER adds nothing on 8 GB.
+  Side effect: org emails (ethics@, secops@) are also redacted to <EMAIL> - acceptable (don't embed emails).
 - Embeddings = BAAI/bge-small-en-v1.5 via fastembed (384-dim), NOT Ollama's nomic-embed-text (768-dim):
   the whole retrieval design (Qdrant collection size, chunk payload, "prints 384" check) is built around 384.
 - GitHub: local repo only for now; no remote pushed yet.

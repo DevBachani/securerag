@@ -58,6 +58,9 @@ class Settings(BaseSettings):
     rerank_model: str = "BAAI/bge-reranker-base"
     rerank_top_n: int = 4
 
+    # --- Governance ---
+    pii_redaction_enabled: bool = True  # redact contact/ID PII before embedding
+
     # --- Retrieval ---
     qdrant_url: str = "http://localhost:6333"
     qdrant_api_key: str = ""

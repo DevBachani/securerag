@@ -159,6 +159,19 @@
       "supersedes": null
     },
     {
+      "doc_id": "hr-disciplinary-log",
+      "path": "hr/disciplinary_cases_log.md",
+      "title": "Disciplinary Cases Log",
+      "department": "hr",
+      "allowed_groups": ["hr", "leadership"],
+      "allowed_users": [],
+      "sensitivity": "confidential",
+      "owner": "u_hrm",
+      "version": "1.0",
+      "effective_date": "2026-09-30",
+      "supersedes": null
+    },
+    {
       "doc_id": "hr-manager-handbook",
       "path": "hr/managers/manager_handbook.md",
       "title": "Manager Handbook",
