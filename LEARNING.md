@@ -58,3 +58,20 @@ Surprises / lessons:
 - Ragas 0.4.3 vs langchain v1 needed a small import shim (langchain-community dropped chat_models.vertexai).
 
 _(add your own reflection: low context-recall vs low faithfulness, why the judge can be wrong, why unanswerable Qs)_
+
+## Phase 6 — ACLs + permission-filtered retrieval
+
+Built SQLModel users/groups (8 demo users seeded), build_filter(user) applied INSIDE the Qdrant query,
+plus an independent is_allowed() post-check (defense in depth). 20-question leakage set.
+
+Result: **leakage_rate = 0.0** over 20 questions. Demo: same question, intern retrieves only public
+docs; CEO retrieves the restructuring plan. Permission-aware retrieval proven. 85 tests pass.
+
+Lessons:
+- **Pre-filter, never post-filter.** Post-filtering pulls forbidden chunks into the app (leak risk) and
+  wastes top-k slots (quality loss). Filtering in the vector query means forbidden data is never a candidate.
+- The leakage guarantee is testable WITHOUT the LLM - it's a property of retrieval - so it's cheap, fast,
+  deterministic, and quota-free. Good for the CI gate (Phase 19).
+- passlib is dead (breaks with bcrypt 5); used bcrypt directly.
+
+_(add your own reflection: post-filter danger, top-k with forbidden chunks, Google Drive ACL sync)_

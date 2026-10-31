@@ -13,6 +13,7 @@ from typing import Any
 from .agent.prompts import REFUSAL, build_answer_prompt, extract_citation_numbers
 from .config import get_settings
 from .providers import complete_with_retry, get_llm
+from .retrieval.permissions import Principal
 from .retrieval.retriever import Retrieved, retrieve
 
 # Substring used to detect the model's refusal, robust to minor wording drift.
@@ -37,9 +38,9 @@ def _citations_from_answer(text: str, retrieved: list[Retrieved]) -> list[dict[s
     return citations
 
 
-def answer(question: str, top_k: int | None = None) -> dict[str, Any]:
-    """Answer a question from the corpus, returning the answer and its citations."""
-    retrieved = retrieve(question, top_k=top_k)
+def answer(question: str, principal: Principal, top_k: int | None = None) -> dict[str, Any]:
+    """Answer a question using only documents `principal` is permitted to read."""
+    retrieved = retrieve(question, principal, top_k=top_k)
     if not retrieved:
         return {"answer": REFUSAL, "citations": [], "retrieved": [], "refused": True}
 

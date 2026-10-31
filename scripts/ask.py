@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import sys
 
+from securerag.db.session import load_principal
 from securerag.rag import answer
 
 # Model output can contain Unicode (e.g. narrow no-break spaces) that the Windows
@@ -20,12 +21,14 @@ sys.stdout.reconfigure(encoding="utf-8")
 def main() -> None:
     parser = argparse.ArgumentParser(description="Ask the baseline RAG a question.")
     parser.add_argument("question", help="The question to answer.")
+    parser.add_argument("--user", default="u_ceo", help="User id asking (default u_ceo).")
     parser.add_argument("--top-k", type=int, default=None, help="Chunks to retrieve.")
     args = parser.parse_args()
 
-    result = answer(args.question, top_k=args.top_k)
+    principal = load_principal(args.user)
+    result = answer(args.question, principal, top_k=args.top_k)
 
-    print(f"Q: {args.question}\n")
+    print(f"Q: {args.question}   (as {principal.id}: {', '.join(principal.groups)})\n")
     print("Answer:")
     print(result["answer"])
 

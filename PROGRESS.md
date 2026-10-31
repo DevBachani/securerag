@@ -1,6 +1,6 @@
 # PROGRESS
 
-## Current phase: 6 — Users, groups and permission-filtered retrieval
+## Current phase: 7 — Hybrid search (BM25 + dense)
 ## Status: not started
 
 ## Environment
@@ -19,6 +19,7 @@
 | 3 — Ingestion pipeline | 2026-10-26 | feat(ingestion): chunking, embeddings and qdrant upsert with ACL payload | 26 files -> 122 chunks -> 122 points, idempotent (UUID5 ids). Dense-only, payload indexes. 68 tests. |
 | 4 — Baseline RAG with citations | 2026-10-26 | feat(rag): baseline dense RAG with citations | Dense retrieve + cited answers via Groq. Baseline: 7/8 answerable correct, 2/2 unanswerable refused, 1 miss (ERR-4021 fix chunk ranked #12). 74 tests. |
 | 5 — Golden eval set + baseline | 2026-10-31 | feat(eval): golden set, ragas + custom metrics, baseline results | 40-question golden set; run_eval.py (4 Ragas + 3 custom). Custom baseline (15Q): hit_rate/citation/refusal = 1.0. Ragas sample (4Q): faithfulness 1.0, ctx_precision 0.83, ctx_recall 0.88. Full Ragas run deferred (Groq daily token cap). |
+| 6 — ACLs + permission-filtered retrieval | 2026-10-31 | feat(security): group ACLs and permission-filtered retrieval with leakage tests | SQLModel users/groups + seed_users; build_filter inside the Qdrant query + defense-in-depth check; 20-question leakage set -> leakage_rate 0.0. 85 tests. |
 
 ## Key decisions (and why)
 - LLM = Ollama / llama3.1:latest (local): no API key, no free-tier limits; machine already has it installed.
@@ -39,6 +40,10 @@
 - Phase 5: Google Gemini is UNUSABLE from this sandbox - generateContent inference times out via BOTH
   REST and the SDK, with free and premium keys (network egress block; metadata GETs work). Not an account
   issue. JUDGE_PROVIDER=gemini path is wired and would work on a normal machine.
+- Phase 6 (rule #10): passlib 1.7.4 is unmaintained and crashes with bcrypt 5.x; use the bcrypt library
+  directly for password hashing instead.
+- Phase 6: permission filter is applied INSIDE the Qdrant query (pre-filtering), with an independent
+  is_allowed() post-check for defense in depth. leakage_rate measured at retrieval -> quota-free.
 - Embeddings = BAAI/bge-small-en-v1.5 via fastembed (384-dim), NOT Ollama's nomic-embed-text (768-dim):
   the whole retrieval design (Qdrant collection size, chunk payload, "prints 384" check) is built around 384.
 - GitHub: local repo only for now; no remote pushed yet.
@@ -47,6 +52,7 @@
 | Phase | Config | Faithfulness | Answer relevancy | Context precision | Context recall | Leakage rate |
 |---|---|---|---|---|---|---|
 | 5 | baseline (Ragas n=4, judge gpt-oss-120b) | 1.00 | n/a* | 0.83 | 0.88 | n/a (Phase 6) |
+| 6 | permission-filtered (leakage set, n=20) | - | - | - | - | **0.00** |
 
 \* answer_relevancy came back n/a (Ragas question-generation step returned no output for these samples).
 Custom metrics, baseline (n=15, all categories): hit_rate@k **1.00**, citation_accuracy **1.00**, refusal_accuracy **1.00**.

@@ -7,11 +7,15 @@ permission filter here yet -- that is added in Phase 6, inside the query.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 
 from ..config import get_settings
 from ..ingestion.pipeline import get_qdrant_client
 from ..providers import get_embed_model
+from .permissions import Principal, build_filter, is_allowed
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -28,8 +32,13 @@ class Retrieved:
     score: float
 
 
-def retrieve(question: str, top_k: int | None = None) -> list[Retrieved]:
-    """Return the top-k chunks nearest to `question` by dense similarity."""
+def retrieve(question: str, principal: Principal, top_k: int | None = None) -> list[Retrieved]:
+    """Return the top-k chunks `principal` may read, nearest to `question`.
+
+    The permission filter is applied inside the Qdrant query (pre-filtering); an
+    independent allow-check afterwards is defense in depth and should never drop
+    anything if the filter is correct.
+    """
     settings = get_settings()
     limit = top_k if top_k is not None else settings.retrieval_top_k
 
@@ -38,6 +47,7 @@ def retrieve(question: str, top_k: int | None = None) -> list[Retrieved]:
     response = client.query_points(
         collection_name=settings.qdrant_collection,
         query=query_vector,
+        query_filter=build_filter(principal),
         limit=limit,
         with_payload=True,
     )
@@ -45,6 +55,14 @@ def retrieve(question: str, top_k: int | None = None) -> list[Retrieved]:
     results: list[Retrieved] = []
     for point in response.points:
         payload = point.payload or {}
+        if not is_allowed(payload, principal):
+            # Should never happen: the query filter already excluded this. Log and drop.
+            logger.error(
+                "permission filter leak detected: doc_id=%s user=%s",
+                payload.get("doc_id"),
+                principal.id,
+            )
+            continue
         results.append(
             Retrieved(
                 doc_id=payload["doc_id"],

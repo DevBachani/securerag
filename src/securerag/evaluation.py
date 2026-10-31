@@ -34,6 +34,14 @@ def refusal_correct(refused: bool, is_unanswerable: bool) -> bool:
     return refused if is_unanswerable else not refused
 
 
+def leakage(
+    retrieved_doc_ids: list[str], cited_doc_ids: list[str], forbidden_doc_ids: list[str]
+) -> float:
+    """1.0 if any forbidden doc was retrieved or cited (a leak), else 0.0."""
+    exposed = set(retrieved_doc_ids) | set(cited_doc_ids)
+    return 1.0 if exposed & set(forbidden_doc_ids) else 0.0
+
+
 def mean_ignoring_none(values: list[float | None]) -> float | None:
     """Average the non-None values; None if there are none."""
     present = [v for v in values if v is not None]

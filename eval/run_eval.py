@@ -47,20 +47,24 @@ from ragas.metrics import (
 from ragas.run_config import RunConfig
 
 from securerag.config import get_settings
+from securerag.db.session import load_principal
 from securerag.evaluation import (
     citation_accuracy,
     hit_rate,
+    leakage,
     mean_ignoring_none,
     refusal_correct,
 )
 from securerag.providers import get_embed_model
 from securerag.rag import answer
+from securerag.retrieval.retriever import retrieve
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 sys.stdout.reconfigure(encoding="utf-8")
 
 REPO = Path(__file__).resolve().parents[1]
 GOLDEN = REPO / "eval" / "golden_set.jsonl"
+LEAKAGE = REPO / "eval" / "leakage_set.jsonl"
 RESULTS_DIR = REPO / "eval" / "results"
 
 # Ragas df column name -> friendly metric name used in our output.
@@ -130,7 +134,8 @@ def run_generation(
     sample_ids: list[str] = []
 
     for row in rows:
-        result = answer(row["question"])
+        principal = load_principal(row["user_id"])
+        result = answer(row["question"], principal)
         retrieved_ids = [r.doc_id for r in result["retrieved"]]
         cited_ids = [c["doc_id"] for c in result["citations"]]
         is_unanswerable = row["category"] == "unanswerable"
@@ -223,6 +228,45 @@ def summarise(per_question: list[dict]) -> dict[str, float | None]:
     return averages
 
 
+def run_leakage(config_name: str) -> dict:
+    """Run the leakage set and compute leakage_rate from RETRIEVAL alone (no LLM).
+
+    A leak is any forbidden document appearing in a user's retrieved set. This is
+    the core security guarantee and needs no judge, so it is quota-free.
+    """
+    lines = LEAKAGE.read_text(encoding="utf-8").splitlines()
+    rows = [json.loads(line) for line in lines if line.strip()]
+    per_question = []
+    for row in rows:
+        principal = load_principal(row["user_id"])
+        retrieved_ids = [r.doc_id for r in retrieve(row["question"], principal)]
+        leak = leakage(retrieved_ids, [], row["forbidden_doc_ids"])
+        per_question.append(
+            {
+                "id": row["id"],
+                "user_id": row["user_id"],
+                "question": row["question"],
+                "forbidden_doc_ids": row["forbidden_doc_ids"],
+                "retrieved_doc_ids": retrieved_ids,
+                "leak": leak,
+            }
+        )
+    leakage_rate = mean_ignoring_none([p["leak"] for p in per_question])
+
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = RESULTS_DIR / f"{datetime.now(UTC).strftime('%Y%m%d')}_{config_name}.json"
+    payload = {
+        "config_name": config_name,
+        "timestamp": datetime.now(UTC).isoformat(),
+        "averages": {"leakage_rate": leakage_rate},
+        "per_question": per_question,
+    }
+    out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print(f"Saved: {out_path.relative_to(REPO)}")
+    print(f"leakage_rate: {leakage_rate:.4f}  (target 0.0) over {len(rows)} questions")
+    return payload
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the golden-set evaluation.")
     parser.add_argument("--config-name", default="baseline", help="Label for this run.")
@@ -235,9 +279,18 @@ def main() -> None:
         action="store_true",
         help="Skip the LLM-judged Ragas metrics; compute only the custom metrics.",
     )
+    parser.add_argument(
+        "--leakage",
+        action="store_true",
+        help="Run the leakage set and report leakage_rate (retrieval-only, no LLM).",
+    )
     args = parser.parse_args()
 
     load_dotenv()
+    if args.leakage:
+        run_leakage(args.config_name if args.config_name != "baseline" else "leakage")
+        return
+
     settings = get_settings()
     ids = set(args.ids.split(",")) if args.ids else None
     rows = load_golden(args.limit, ids)
