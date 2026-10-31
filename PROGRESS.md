@@ -1,6 +1,6 @@
 # PROGRESS
 
-## Current phase: 8 — Cross-encoder reranking
+## Current phase: 9 — Incremental sync and document versions
 ## Status: not started
 
 ## Environment
@@ -21,6 +21,7 @@
 | 5 — Golden eval set + baseline | 2026-10-31 | feat(eval): golden set, ragas + custom metrics, baseline results | 40-question golden set; run_eval.py (4 Ragas + 3 custom). Custom baseline (15Q): hit_rate/citation/refusal = 1.0. Ragas sample (4Q): faithfulness 1.0, ctx_precision 0.83, ctx_recall 0.88. Full Ragas run deferred (Groq daily token cap). |
 | 6 — ACLs + permission-filtered retrieval | 2026-10-31 | feat(security): group ACLs and permission-filtered retrieval with leakage tests | SQLModel users/groups + seed_users; build_filter inside the Qdrant query + defense-in-depth check; 20-question leakage set -> leakage_rate 0.0. 85 tests. |
 | 7 — Hybrid search (BM25 + dense) | 2026-10-31 | feat(retrieval): hybrid BM25 + dense search with RRF | Named dense+sparse vectors, RRF fusion, permission filter on both branches. hit_rate@1 keyword: dense 0.75 -> hybrid 1.00. leakage still 0.0. 89 tests. |
+| 8 — Cross-encoder reranking | 2026-10-31 | feat(retrieval): cross-encoder reranking with latency measurement | bge-reranker-base via fastembed ONNX (no PyTorch). Retrieve wide -> rerank -> top_n. hit_rate stays 1.0 (saturated); rerank adds ~1.3-2.8s median CPU latency. Best pool=8. 91 tests. |
 
 ## Key decisions (and why)
 - LLM = Ollama / llama3.1:latest (local): no API key, no free-tier limits; machine already has it installed.
@@ -45,6 +46,8 @@
   directly for password hashing instead.
 - Phase 6: permission filter is applied INSIDE the Qdrant query (pre-filtering), with an independent
   is_allowed() post-check for defense in depth. leakage_rate measured at retrieval -> quota-free.
+- Phase 8 (rule #10): used fastembed's ONNX cross-encoder (TextCrossEncoder) for bge-reranker-base
+  instead of the torch-based SentenceTransformerRerank -> no ~1-2 GB PyTorch install on an 8 GB machine.
 - Embeddings = BAAI/bge-small-en-v1.5 via fastembed (384-dim), NOT Ollama's nomic-embed-text (768-dim):
   the whole retrieval design (Qdrant collection size, chunk payload, "prints 384" check) is built around 384.
 - GitHub: local repo only for now; no remote pushed yet.
@@ -60,6 +63,12 @@ Phase 7 retrieval comparison (hit_rate@k, quota-free, all 44 golden questions):
 - **@1 keyword: dense 0.75 -> hybrid 1.00**; @1 overall: dense 0.95 -> hybrid 1.00.
 - Example only hybrid gets at #1: "fix for ERR-6210" (dense returns the ERR-5002 doc; BM25 matches the exact code).
 - leakage_rate stays **0.00** with hybrid (filter on both dense and sparse branches).
+
+Phase 8 reranking (hit_rate@final-k + latency, all 44 questions; eval/results/20261031_rerank_latency.json):
+- hybrid @4 no-rerank: hit_rate 1.00, median 744ms, p95 825ms.
+- hybrid+rerank pool8->4: 1.00, 2021ms / 2934ms.  pool12->4: 1.00, 2499ms / 3698ms.  pool20->4: 0.975, 3506ms / 5950ms.
+- One-liner: reranking left hit_rate unchanged (already saturated at k=4) and added ~1.3-2.8s median
+  CPU latency; its real benefit is context precision (needs Ragas / a bigger corpus). Best pool = 8.
 
 \* answer_relevancy came back n/a (Ragas question-generation step returned no output for these samples).
 Custom metrics, baseline (n=15, all categories): hit_rate@k **1.00**, citation_accuracy **1.00**, refusal_accuracy **1.00**.

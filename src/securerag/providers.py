@@ -225,14 +225,13 @@ def get_sparse_embed_model() -> Any:
     return SparseTextEmbedding(model_name=get_settings().sparse_embed_model)
 
 
+@lru_cache
 def get_reranker() -> Any:
-    """Build the cross-encoder reranker. Imported lazily; its heavy deps land in Phase 8."""
-    s = get_settings()
-    try:
-        from llama_index.postprocessor.flag_embedding_reranker import FlagEmbeddingReranker
-    except ImportError as exc:
-        raise RuntimeError(
-            "Reranker not available yet (needs PyTorch). It is wired up in Phase 8 via "
-            "`uv add llama-index-postprocessor-flag-embedding-reranker`."
-        ) from exc
-    return FlagEmbeddingReranker(model=s.rerank_model, top_n=s.rerank_top_n)
+    """Return the cross-encoder reranker (fastembed ONNX, no PyTorch).
+
+    Cached so the model loads once per process. fastembed's ONNX cross-encoder
+    gives us BAAI/bge-reranker-base locally without the heavy torch stack.
+    """
+    from fastembed.rerank.cross_encoder import TextCrossEncoder
+
+    return TextCrossEncoder(model_name=get_settings().rerank_model)

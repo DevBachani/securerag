@@ -1,0 +1,12 @@
+{
+  "config_name": "rerank_latency",
+  "timestamp": "2026-10-31",
+  "note": "Measured on the dev machine (8 GB CPU, Groq generator). hit_rate@final-k and per-query latency over all 44 golden questions. Retrieval+rerank only (no LLM). bge-reranker-base runs on CPU via fastembed ONNX.",
+  "configs": [
+    {"label": "hybrid @4 (no rerank)", "hybrid": true, "rerank": false, "candidate_k": 4, "top_n": 4, "hit_rate": 1.000, "latency_median_ms": 744, "latency_p95_ms": 825},
+    {"label": "hybrid+rerank pool8->4", "hybrid": true, "rerank": true, "candidate_k": 8, "top_n": 4, "hit_rate": 1.000, "latency_median_ms": 2021, "latency_p95_ms": 2934},
+    {"label": "hybrid+rerank pool12->4", "hybrid": true, "rerank": true, "candidate_k": 12, "top_n": 4, "hit_rate": 1.000, "latency_median_ms": 2499, "latency_p95_ms": 3698},
+    {"label": "hybrid+rerank pool20->4", "hybrid": true, "rerank": true, "candidate_k": 20, "top_n": 4, "hit_rate": 0.975, "latency_median_ms": 3506, "latency_p95_ms": 5950}
+  ],
+  "findings": "hit_rate already saturated at k=4 on this 26-doc corpus, so reranking does not improve recall and adds ~1.3-2.8s median latency on CPU. pool 20 slightly worsens hit_rate (ref doc pushed out of top-4). Rerank's benefit is context precision (ordering), visible via Ragas or on a larger corpus. Best candidate pool here: 8."
+}

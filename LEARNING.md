@@ -95,3 +95,24 @@ Lessons:
   k (and a corpus) where the metric has headroom, or you'll "prove" nothing.
 
 _(add your own reflection: why embeddings miss exact codes, how RRF works, why hybrid may not help a category)_
+
+## Phase 8 — Cross-encoder reranking
+
+Added retrieval/rerank.py using bge-reranker-base via fastembed's ONNX cross-encoder (NO PyTorch - big
+win on 8 GB RAM). Pipeline: hybrid retrieve wide (top_k) -> permission check -> rerank -> top_n. Behind
+RERANK_ENABLED.
+
+Measured (44 questions, CPU):
+- hybrid @4 no-rerank: hit_rate 1.00, median 744ms.
+- +rerank pool8->4: 1.00, 2021ms.  pool12->4: 1.00, 2499ms.  pool20->4: 0.975, 3506ms.
+
+One-sentence verdict: on this saturated corpus reranking adds ~1.3-2.8s median latency for no recall gain,
+and pool 20 even drops hit_rate - its value is precision/ordering, not recall.
+
+Lessons:
+- **Cross-encoders are O(N) per query** - only affordable on a small candidate set from a cheap first stage.
+- **Rerank can't fix recall** (it only reorders what retrieval returned); it improves context precision.
+- **Know when to skip it.** If first-stage metrics are already saturated, reranking is pure latency cost.
+- fastembed ONNX avoided the torch install the spec implied.
+
+_(add your own reflection: why not cross-encode the whole corpus, precision vs recall, when to skip rerank)_

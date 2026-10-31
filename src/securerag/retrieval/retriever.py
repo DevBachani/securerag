@@ -98,4 +98,10 @@ def retrieve(question: str, principal: Principal, top_k: int | None = None) -> l
                 score=score,
             )
         )
+
+    # Recall-then-precision: rerank the wide candidate set down to the best few.
+    if settings.rerank_enabled and results:
+        from .rerank import rerank
+
+        results = rerank(question, results, settings.rerank_top_n)
     return results
