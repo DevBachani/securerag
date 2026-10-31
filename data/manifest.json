@@ -39,6 +39,19 @@
       "owner": "u_fin",
       "version": "2.0",
       "effective_date": "2026-07-01",
+      "supersedes": "pub-travel-policy-v1"
+    },
+    {
+      "doc_id": "pub-travel-policy-v1",
+      "path": "public/travel_policy_v1.md",
+      "title": "Travel & Expense Policy v1.0",
+      "department": "public",
+      "allowed_groups": ["all"],
+      "allowed_users": [],
+      "sensitivity": "public",
+      "owner": "u_fin",
+      "version": "1.0",
+      "effective_date": "2025-07-01",
       "supersedes": null
     },
     {

@@ -104,16 +104,14 @@ def _batched(items: list[Any], size: int) -> Iterator[list[Any]]:
         yield items[start : start + size]
 
 
-def ingest(reset: bool = False, manifest_path: str | None = None) -> dict[str, int]:
-    """Run the full pipeline and return counts of files, chunks and points."""
-    settings = get_settings()
-    client = get_qdrant_client()
-    ensure_collection(client, settings.qdrant_collection, reset)
+def build_points(nodes: list[BaseNode]) -> list[models.PointStruct]:
+    """Embed nodes (dense + sparse) and build Qdrant points with ACL payloads.
 
+    Chunk indices restart per doc_id, so point ids are deterministic and a
+    re-ingest of the same content overwrites rather than duplicates.
+    """
     embed_model = get_embed_model()
     sparse_model = get_sparse_embed_model()
-    documents = load_documents(manifest_path)
-    nodes = chunk_documents(documents)
     now = datetime.now(UTC).isoformat()
 
     per_doc_counter: dict[str, int] = {}
@@ -139,9 +137,24 @@ def ingest(reset: bool = False, manifest_path: str | None = None) -> dict[str, i
                 payload=_build_payload(node, text, point_id, chunk_index, now),
             )
         )
+    return points
 
+
+def upsert_points(client: QdrantClient, collection: str, points: list[models.PointStruct]) -> None:
+    """Upsert points into Qdrant in batches."""
     for batch in _batched(points, 64):
-        client.upsert(collection_name=settings.qdrant_collection, points=batch)
+        client.upsert(collection_name=collection, points=batch)
+
+
+def ingest(reset: bool = False, manifest_path: str | None = None) -> dict[str, int]:
+    """Run the full pipeline and return counts of files, chunks and points."""
+    settings = get_settings()
+    client = get_qdrant_client()
+    ensure_collection(client, settings.qdrant_collection, reset)
+
+    documents = load_documents(manifest_path)
+    nodes = chunk_documents(documents)
+    upsert_points(client, settings.qdrant_collection, build_points(nodes))
 
     point_count = client.count(collection_name=settings.qdrant_collection, exact=True).count
     # "files" counts source documents, not PDF pages, so count distinct doc_ids.

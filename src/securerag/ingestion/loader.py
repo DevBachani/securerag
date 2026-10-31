@@ -28,7 +28,7 @@ def load_manifest(manifest_path: str | Path | None = None) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _base_metadata(entry: dict[str, Any]) -> dict[str, Any]:
+def _base_metadata(entry: dict[str, Any], is_current: bool) -> dict[str, Any]:
     """Copy the permission/provenance fields that every chunk must carry."""
     return {
         "doc_id": entry["doc_id"],
@@ -42,9 +42,14 @@ def _base_metadata(entry: dict[str, Any]) -> dict[str, Any]:
         "effective_date": entry["effective_date"],
         "owner": entry["owner"],
         "supersedes": entry.get("supersedes"),
-        # Phase 9 flips this to False for superseded document versions.
-        "is_current": True,
+        # False for a version that some other doc supersedes (Phase 9).
+        "is_current": is_current,
     }
+
+
+def superseded_doc_ids(manifest: dict[str, Any]) -> set[str]:
+    """Return doc_ids that are superseded by some other (newer) document."""
+    return {e["supersedes"] for e in manifest["documents"] if e.get("supersedes")}
 
 
 def _load_markdown(fpath: Path, meta: dict[str, Any]) -> Document:
@@ -64,15 +69,24 @@ def _load_pdf(fpath: Path, meta: dict[str, Any]) -> list[Document]:
     return documents
 
 
-def load_documents(manifest_path: str | Path | None = None) -> list[Document]:
-    """Load every file listed in the manifest into Documents with ACL metadata."""
+def load_documents(
+    manifest_path: str | Path | None = None, only_doc_ids: set[str] | None = None
+) -> list[Document]:
+    """Load manifest files into Documents with ACL metadata and is_current set.
+
+    If `only_doc_ids` is given, only those documents are loaded (used by sync to
+    re-embed just the changed files).
+    """
     manifest = load_manifest(manifest_path)
     corpus = _repo_root() / manifest.get("corpus_root", "data/corpus")
+    superseded = superseded_doc_ids(manifest)
 
     documents: list[Document] = []
     for entry in manifest["documents"]:
+        if only_doc_ids is not None and entry["doc_id"] not in only_doc_ids:
+            continue
         fpath = corpus / entry["path"]
-        meta = _base_metadata(entry)
+        meta = _base_metadata(entry, is_current=entry["doc_id"] not in superseded)
         if fpath.suffix.lower() == ".pdf":
             documents.extend(_load_pdf(fpath, meta))
         else:

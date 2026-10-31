@@ -116,3 +116,21 @@ Lessons:
 - fastembed ONNX avoided the torch install the spec implied.
 
 _(add your own reflection: why not cross-encode the whole corpus, precision vs recall, when to skip rerank)_
+
+## Phase 9 — Incremental sync + document versions
+
+Added ingest_state (content_hash + meta_hash) and ingestion/sync.py: only new/changed files are
+re-embedded, deleted files have their chunks removed, and an ACL/version change updates the chunk
+payload in place (no re-embed). Added travel_policy_v1 (superseded); retrieval filters is_current=true.
+
+Verified: full rebuild 27 files/127 chunks; re-running sync = all unchanged (0.8s); the stale v1 policy
+is never retrieved; an ACL change (temp manifest) updates the payload and reverts cleanly. leakage 0.0.
+99 tests.
+
+Lessons:
+- **Hash content, not mtime.** mtime changes on touch/clone (false churn) and can miss real edits.
+- **The vector-store payload is the enforcement point** - an un-synced ACL tightening keeps serving
+  revoked content. Sync must update the payload on an ACL change even when content is unchanged.
+- Two hashes separate concerns: content_hash -> re-embed; meta_hash -> cheap payload update.
+
+_(add your own reflection: hash vs mtime, security risk of unsynced ACLs, Google Drive change feed)_

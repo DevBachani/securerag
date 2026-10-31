@@ -38,3 +38,13 @@ def test_build_filter_uses_groups_and_user_id():
     assert "all" in group_cond.match.any
     assert user_cond.key == "allowed_users"
     assert user_cond.match.any == ["u_int"]
+
+    # By default the filter also requires the chunk to be the current version.
+    assert filt.must is not None and len(filt.must) == 1
+    assert filt.must[0].key == "is_current"
+    assert filt.must[0].match.value is True
+
+
+def test_build_filter_can_disable_current_only():
+    filt = build_filter(INTERN, current_only=False)
+    assert not filt.must

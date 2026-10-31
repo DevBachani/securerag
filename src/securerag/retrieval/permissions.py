@@ -25,11 +25,20 @@ class Principal:
     groups: list[str]
 
 
-def build_filter(principal: Principal) -> models.Filter:
-    """Build a Qdrant filter that admits only chunks this user may read."""
-    # `should` is OR: a chunk passes if its groups overlap the user's groups,
-    # or its allowed_users list contains this user's id.
+def build_filter(principal: Principal, current_only: bool = True) -> models.Filter:
+    """Build a Qdrant filter admitting only readable (and current) chunks.
+
+    `must` AND `should`: the chunk must be current (not a superseded version), and
+    at least one `should` must hold -- its groups overlap the user's groups, or its
+    allowed_users contains this user's id.
+    """
+    must = []
+    if current_only:
+        must.append(
+            models.FieldCondition(key="is_current", match=models.MatchValue(value=True))
+        )
     return models.Filter(
+        must=must,
         should=[
             models.FieldCondition(
                 key="allowed_groups",
@@ -39,7 +48,7 @@ def build_filter(principal: Principal) -> models.Filter:
                 key="allowed_users",
                 match=models.MatchAny(any=[principal.id]),
             ),
-        ]
+        ],
     )
 
 

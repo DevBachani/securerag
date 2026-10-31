@@ -42,3 +42,20 @@ class User(SQLModel, table=True):
     password_hash: str
     is_active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+class IngestState(SQLModel, table=True):
+    """Per-document ingestion state, so sync only touches what changed.
+
+    content_hash detects a changed file (-> re-embed); meta_hash detects a changed
+    manifest entry such as an ACL change (-> update payload without re-embedding).
+    """
+
+    __tablename__ = "ingest_state"
+
+    doc_id: str = Field(primary_key=True)
+    path: str
+    content_hash: str
+    meta_hash: str
+    chunk_count: int
+    last_ingested_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
