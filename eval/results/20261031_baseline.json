@@ -1,0 +1,466 @@
+{
+  "config_name": "baseline",
+  "timestamp": "2026-10-31T15:40:30.520717+00:00",
+  "params": {
+    "generator": "openai/gpt-oss-120b",
+    "judge": "openai/gpt-oss-20b",
+    "retrieval_top_k": 12,
+    "answer_context_chunks": 6,
+    "hybrid_enabled": true,
+    "rerank_enabled": true,
+    "n_questions": 15,
+    "ragas_scored": false
+  },
+  "averages": {
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null,
+    "hit_rate": 1.0,
+    "citation_accuracy": 1.0,
+    "refusal_accuracy": 1.0
+  },
+  "per_question": [
+    {
+      "id": "f01",
+      "category": "factual",
+      "question": "How many earned leaves do employees get per year?",
+      "answer": "Employees receive **24 earned leaves per year**\u30101\u3011.",
+      "refused": false,
+      "retrieved_doc_ids": [
+        "pub-leave-policy",
+        "pub-leave-policy",
+        "hr-manager-handbook",
+        "lead-restructuring",
+        "pub-benefits",
+        "hr-promotion-criteria",
+        "pub-leave-policy",
+        "pub-benefits",
+        "pub-leave-policy",
+        "pub-holidays-2026",
+        "pub-leave-policy",
+        "pub-holidays-2026"
+      ],
+      "cited_doc_ids": [
+        "pub-leave-policy"
+      ],
+      "reference_doc_ids": [
+        "pub-leave-policy"
+      ],
+      "hit_rate": 1.0,
+      "citation_accuracy": 1.0,
+      "refusal_correct": true
+    },
+    {
+      "id": "f04",
+      "category": "factual",
+      "question": "What is the domestic per diem for travel?",
+      "answer": "The domestic per\u2011diem is **\u20b92,500 per day** for meals and incidentals\u30101\u3011.",
+      "refused": false,
+      "retrieved_doc_ids": [
+        "pub-travel-policy",
+        "pub-travel-policy",
+        "pub-travel-policy",
+        "pub-travel-policy",
+        "pub-benefits",
+        "pub-benefits",
+        "fin-vendor-contracts",
+        "pub-travel-policy",
+        "hr-manager-handbook",
+        "pub-benefits",
+        "pub-onboarding",
+        "pub-leave-policy"
+      ],
+      "cited_doc_ids": [
+        "pub-travel-policy"
+      ],
+      "reference_doc_ids": [
+        "pub-travel-policy"
+      ],
+      "hit_rate": 1.0,
+      "citation_accuracy": 1.0,
+      "refusal_correct": true
+    },
+    {
+      "id": "f11",
+      "category": "factual",
+      "question": "What is the seat capacity of the Bengaluru headquarters?",
+      "answer": "The Bengaluru headquarters has a capacity of **220 seats**\u30101\u3011.",
+      "refused": false,
+      "retrieved_doc_ids": [
+        "pub-office-locations",
+        "pub-office-locations",
+        "pub-office-locations",
+        "lead-board-notes",
+        "pub-travel-policy",
+        "fin-vendor-contracts",
+        "pub-office-locations",
+        "fin-q2-budget",
+        "lead-ma-shortlist",
+        "pub-office-locations",
+        "lead-board-notes",
+        "lead-restructuring"
+      ],
+      "cited_doc_ids": [
+        "pub-office-locations"
+      ],
+      "reference_doc_ids": [
+        "pub-office-locations"
+      ],
+      "hit_rate": 1.0,
+      "citation_accuracy": 1.0,
+      "refusal_correct": true
+    },
+    {
+      "id": "f13",
+      "category": "factual",
+      "question": "How many performance review cycles are there per year and when?",
+      "answer": "There are **two performance\u2011review cycles each year**, and they conclude in **April and October**\u30101\u3011.",
+      "refused": false,
+      "retrieved_doc_ids": [
+        "hr-perf-review",
+        "hr-promotion-criteria",
+        "hr-perf-review",
+        "hr-perf-review",
+        "hr-perf-review",
+        "hr-promotion-criteria",
+        "hr-manager-handbook",
+        "hr-manager-handbook",
+        "pub-holidays-2026",
+        "eng-pm-search",
+        "hr-hiring-plan",
+        "eng-deployment"
+      ],
+      "cited_doc_ids": [
+        "hr-perf-review"
+      ],
+      "reference_doc_ids": [
+        "hr-perf-review"
+      ],
+      "hit_rate": 1.0,
+      "citation_accuracy": 1.0,
+      "refusal_correct": true
+    },
+    {
+      "id": "f18",
+      "category": "factual",
+      "question": "What is Acme's annual AWS spend?",
+      "answer": "Acme\u2019s annual AWS spend is **\u20b93.2\u202fcrore**\u30105\u3011.",
+      "refused": false,
+      "retrieved_doc_ids": [
+        "fin-vendor-contracts",
+        "eng-architecture",
+        "hr-hiring-plan",
+        "pub-benefits",
+        "fin-vendor-contracts",
+        "hr-hiring-plan",
+        "hr-perf-review",
+        "fin-vendor-contracts",
+        "pub-holidays-2026",
+        "pub-it-security",
+        "pub-office-locations",
+        "hr-promotion-criteria"
+      ],
+      "cited_doc_ids": [
+        "fin-vendor-contracts"
+      ],
+      "reference_doc_ids": [
+        "fin-vendor-contracts"
+      ],
+      "hit_rate": 1.0,
+      "citation_accuracy": 1.0,
+      "refusal_correct": true
+    },
+    {
+      "id": "f20",
+      "category": "factual",
+      "question": "What was Q2 FY27 revenue?",
+      "answer": "Q2 FY27 revenue was **\u20b962\u202fcrore**\u30101\u3011.",
+      "refused": false,
+      "retrieved_doc_ids": [
+        "lead-board-notes",
+        "fin-q2-budget",
+        "hr-hiring-plan",
+        "lead-board-notes",
+        "lead-ma-shortlist",
+        "hr-salary-bands",
+        "fin-vendor-contracts",
+        "lead-board-notes",
+        "fin-vendor-contracts",
+        "lead-board-notes",
+        "hr-hiring-plan",
+        "lead-restructuring"
+      ],
+      "cited_doc_ids": [
+        "lead-board-notes"
+      ],
+      "reference_doc_ids": [
+        "lead-board-notes"
+      ],
+      "hit_rate": 1.0,
+      "citation_accuracy": 1.0,
+      "refusal_correct": true
+    },
+    {
+      "id": "t01",
+      "category": "table",
+      "question": "What is the salary band range (minimum to maximum) for level L4?",
+      "answer": "The salary band for level\u202fL4 spans **22.0\u202fLPA (minimum) to 34.0\u202fLPA (maximum)**\u30101\u3011.",
+      "refused": false,
+      "retrieved_doc_ids": [
+        "hr-salary-bands",
+        "hr-promotion-criteria",
+        "hr-perf-review",
+        "hr-promotion-criteria",
+        "hr-promotion-criteria",
+        "hr-promotion-criteria",
+        "hr-perf-review",
+        "hr-hiring-plan",
+        "hr-manager-handbook",
+        "lead-ma-shortlist",
+        "pub-benefits",
+        "fin-expense-limits"
+      ],
+      "cited_doc_ids": [
+        "hr-salary-bands"
+      ],
+      "reference_doc_ids": [
+        "hr-salary-bands"
+      ],
+      "hit_rate": 1.0,
+      "citation_accuracy": 1.0,
+      "refusal_correct": true
+    },
+    {
+      "id": "t04",
+      "category": "table",
+      "question": "What is the total Q2 FY27 budget?",
+      "answer": "The total Q2\u202fFY27 budget is **\u20b936\u202fcrore**\u30101\u3011.",
+      "refused": false,
+      "retrieved_doc_ids": [
+        "fin-q2-budget",
+        "hr-hiring-plan",
+        "lead-board-notes",
+        "lead-ma-shortlist",
+        "hr-salary-bands",
+        "hr-hiring-plan",
+        "lead-board-notes",
+        "hr-hiring-plan",
+        "lead-restructuring",
+        "pub-benefits",
+        "hr-promotion-criteria",
+        "fin-vendor-contracts"
+      ],
+      "cited_doc_ids": [
+        "fin-q2-budget"
+      ],
+      "reference_doc_ids": [
+        "fin-q2-budget"
+      ],
+      "hit_rate": 1.0,
+      "citation_accuracy": 1.0,
+      "refusal_correct": true
+    },
+    {
+      "id": "t06",
+      "category": "table",
+      "question": "What is a Manager's single-transaction expense approval limit?",
+      "answer": "A Manager can approve a single\u2011transaction expense up to **\u20b950,000**\u30101\u2020L7-L9\u3011\u30102\u2020L2-L3\u3011",
+      "refused": false,
+      "retrieved_doc_ids": [
+        "fin-expense-limits",
+        "hr-manager-handbook",
+        "lead-ma-shortlist",
+        "hr-promotion-criteria",
+        "lead-board-notes",
+        "fin-vendor-contracts",
+        "fin-vendor-contracts",
+        "eng-pm-payments",
+        "pub-code-of-conduct",
+        "pub-travel-policy",
+        "eng-pm-payments",
+        "eng-pm-payments"
+      ],
+      "cited_doc_ids": [],
+      "reference_doc_ids": [
+        "fin-expense-limits"
+      ],
+      "hit_rate": 1.0,
+      "citation_accuracy": null,
+      "refusal_correct": true
+    },
+    {
+      "id": "m01",
+      "category": "multi_hop",
+      "question": "What performance rating makes an employee promotion-eligible, and what is the promotion budget cap?",
+      "answer": "A rating of **4 or higher** (for two consecutive cycles) makes an employee promotion\u2011eligible\u30102\u2020L1-L2\u3011\u30105\u2020L1-L2\u3011.  \nThe annual promotion budget is capped at **12\u202f% of team cost**\u30101\u2020L1-L2\u3011.",
+      "refused": false,
+      "retrieved_doc_ids": [
+        "hr-promotion-criteria",
+        "hr-perf-review",
+        "hr-promotion-criteria",
+        "hr-perf-review",
+        "hr-promotion-criteria",
+        "fin-expense-limits",
+        "hr-manager-handbook",
+        "hr-perf-review",
+        "lead-restructuring",
+        "hr-hiring-plan",
+        "pub-benefits",
+        "hr-manager-handbook"
+      ],
+      "cited_doc_ids": [],
+      "reference_doc_ids": [
+        "hr-perf-review",
+        "hr-promotion-criteria"
+      ],
+      "hit_rate": 1.0,
+      "citation_accuracy": null,
+      "refusal_correct": true
+    },
+    {
+      "id": "m03",
+      "category": "multi_hop",
+      "question": "What is the SEV1 response target, and which error-code incident had a 42-minute outage?",
+      "answer": "The SEV1 response target is **15\u202fminutes**\u30101\u3011.  \nThe incident with a **42\u2011minute** outage is **ERR\u20114021** (Payment Gateway Timeout)\u30104\u3011.",
+      "refused": false,
+      "retrieved_doc_ids": [
+        "eng-oncall-runbook",
+        "eng-pm-search",
+        "eng-pm-auth",
+        "eng-pm-payments",
+        "eng-pm-search",
+        "eng-pm-auth",
+        "eng-pm-payments",
+        "pub-it-security",
+        "eng-oncall-runbook",
+        "eng-oncall-runbook",
+        "eng-api-standards",
+        "eng-pm-payments"
+      ],
+      "cited_doc_ids": [
+        "eng-oncall-runbook",
+        "eng-pm-payments"
+      ],
+      "reference_doc_ids": [
+        "eng-oncall-runbook",
+        "eng-pm-payments"
+      ],
+      "hit_rate": 1.0,
+      "citation_accuracy": 1.0,
+      "refusal_correct": true
+    },
+    {
+      "id": "k01",
+      "category": "keyword",
+      "question": "What was the root cause of incident ERR-4021?",
+      "answer": "The payments service exhausted its database connection pool\u2014a traffic spike together with a slow downstream query kept connections open, and the pool size of\u202f20 was too small to handle the load\u30103\u3011.",
+      "refused": false,
+      "retrieved_doc_ids": [
+        "eng-pm-payments",
+        "eng-pm-auth",
+        "eng-pm-payments",
+        "eng-pm-search",
+        "eng-oncall-runbook",
+        "pub-it-security",
+        "eng-api-standards",
+        "eng-pm-search",
+        "eng-oncall-runbook",
+        "eng-oncall-runbook",
+        "pub-code-of-conduct",
+        "eng-pm-auth"
+      ],
+      "cited_doc_ids": [
+        "eng-pm-payments"
+      ],
+      "reference_doc_ids": [
+        "eng-pm-payments"
+      ],
+      "hit_rate": 1.0,
+      "citation_accuracy": 1.0,
+      "refusal_correct": true
+    },
+    {
+      "id": "k04",
+      "category": "keyword",
+      "question": "What format do Acme API error codes use?",
+      "answer": "Acme API error codes follow the format **`ERR-XXXX`** (e.g.,\u202f`ERR-4021`)\u30101\u3011",
+      "refused": false,
+      "retrieved_doc_ids": [
+        "eng-api-standards",
+        "eng-architecture",
+        "eng-api-standards",
+        "pub-it-security",
+        "eng-api-standards",
+        "eng-pm-auth",
+        "hr-promotion-criteria",
+        "hr-hiring-plan",
+        "pub-code-of-conduct",
+        "pub-code-of-conduct",
+        "pub-code-of-conduct",
+        "pub-office-locations"
+      ],
+      "cited_doc_ids": [
+        "eng-api-standards"
+      ],
+      "reference_doc_ids": [
+        "eng-api-standards"
+      ],
+      "hit_rate": 1.0,
+      "citation_accuracy": 1.0,
+      "refusal_correct": true
+    },
+    {
+      "id": "u01",
+      "category": "unanswerable",
+      "question": "What is the CEO's personal mobile phone number?",
+      "answer": "I don't have enough information to answer that.",
+      "refused": true,
+      "retrieved_doc_ids": [
+        "eng-oncall-runbook",
+        "pub-onboarding",
+        "lead-board-notes",
+        "hr-manager-handbook",
+        "lead-ma-shortlist",
+        "pub-office-locations",
+        "pub-office-locations",
+        "pub-benefits",
+        "pub-it-security",
+        "pub-office-locations",
+        "pub-office-locations",
+        "hr-hiring-plan"
+      ],
+      "cited_doc_ids": [],
+      "reference_doc_ids": [],
+      "hit_rate": null,
+      "citation_accuracy": null,
+      "refusal_correct": true
+    },
+    {
+      "id": "u03",
+      "category": "unanswerable",
+      "question": "How many vacation days do contractors in Acme's US office get?",
+      "answer": "I don't have enough information to answer that.",
+      "refused": true,
+      "retrieved_doc_ids": [
+        "pub-office-locations",
+        "pub-holidays-2026",
+        "pub-benefits",
+        "hr-perf-review",
+        "hr-promotion-criteria",
+        "hr-hiring-plan",
+        "pub-code-of-conduct",
+        "hr-hiring-plan",
+        "fin-vendor-contracts",
+        "eng-architecture",
+        "pub-code-of-conduct",
+        "pub-onboarding"
+      ],
+      "cited_doc_ids": [],
+      "reference_doc_ids": [],
+      "hit_rate": null,
+      "citation_accuracy": null,
+      "refusal_correct": true
+    }
+  ]
+}

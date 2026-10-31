@@ -1,6 +1,6 @@
 # PROGRESS
 
-## Current phase: 5 — Golden evaluation set and baseline scores
+## Current phase: 6 — Users, groups and permission-filtered retrieval
 ## Status: not started
 
 ## Environment
@@ -18,6 +18,7 @@
 | 2 — Configuration and model providers | 2026-10-26 | feat(core): settings and pluggable model providers | Settings + factories (llm/judge/embed/reranker/langchain), tenacity backoff, diskcache embed cache. 63 tests, smoke 3/3. Reranker/gemini lazy. |
 | 3 — Ingestion pipeline | 2026-10-26 | feat(ingestion): chunking, embeddings and qdrant upsert with ACL payload | 26 files -> 122 chunks -> 122 points, idempotent (UUID5 ids). Dense-only, payload indexes. 68 tests. |
 | 4 — Baseline RAG with citations | 2026-10-26 | feat(rag): baseline dense RAG with citations | Dense retrieve + cited answers via Groq. Baseline: 7/8 answerable correct, 2/2 unanswerable refused, 1 miss (ERR-4021 fix chunk ranked #12). 74 tests. |
+| 5 — Golden eval set + baseline | 2026-10-31 | feat(eval): golden set, ragas + custom metrics, baseline results | 40-question golden set; run_eval.py (4 Ragas + 3 custom). Custom baseline (15Q): hit_rate/citation/refusal = 1.0. Ragas sample (4Q): faithfulness 1.0, ctx_precision 0.83, ctx_recall 0.88. Full Ragas run deferred (Groq daily token cap). |
 
 ## Key decisions (and why)
 - LLM = Ollama / llama3.1:latest (local): no API key, no free-tier limits; machine already has it installed.
@@ -32,6 +33,12 @@
   live /models endpoint, not hard-coded.
 - Phase 4: generator sees only top ANSWER_CONTEXT_CHUNKS (6) of RETRIEVAL_TOP_K (12); keeps prompts
   small. Citation parser accepts ASCII [1] and full-width 【1】 brackets (gpt-oss emits the latter).
+- Phase 5 (rule #10): judge = Groq gpt-oss-20b (qwen failed Ragas structured output -> faithfulness 0.0).
+  Groq free tier = 200k tokens/day per model; heavy Ragas runs exhaust it, so run_eval has --no-ragas
+  (custom metrics only) and --ids (subset). Ragas 0.4.3 needs a vertexai import shim (langchain v1 dropped it).
+- Phase 5: Google Gemini is UNUSABLE from this sandbox - generateContent inference times out via BOTH
+  REST and the SDK, with free and premium keys (network egress block; metadata GETs work). Not an account
+  issue. JUDGE_PROVIDER=gemini path is wired and would work on a normal machine.
 - Embeddings = BAAI/bge-small-en-v1.5 via fastembed (384-dim), NOT Ollama's nomic-embed-text (768-dim):
   the whole retrieval design (Qdrant collection size, chunk payload, "prints 384" check) is built around 384.
 - GitHub: local repo only for now; no remote pushed yet.
@@ -39,6 +46,11 @@
 ## Eval scores so far
 | Phase | Config | Faithfulness | Answer relevancy | Context precision | Context recall | Leakage rate |
 |---|---|---|---|---|---|---|
+| 5 | baseline (Ragas n=4, judge gpt-oss-120b) | 1.00 | n/a* | 0.83 | 0.88 | n/a (Phase 6) |
+
+\* answer_relevancy came back n/a (Ragas question-generation step returned no output for these samples).
+Custom metrics, baseline (n=15, all categories): hit_rate@k **1.00**, citation_accuracy **1.00**, refusal_accuracy **1.00**.
+Full 40-question Ragas pass deferred: Groq free tier is 200k tokens/day **per model** and today's runs exhausted gpt-oss-20b; re-run after daily reset (or on gpt-oss-120b).
 
 ## Open issues / questions
 - Machine has only ~8 GB RAM. llama3.1:8b (4.9 GB) runs but is tight once Qdrant + fastembed +

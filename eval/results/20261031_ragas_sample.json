@@ -1,0 +1,163 @@
+{
+  "config_name": "ragas_sample",
+  "timestamp": "2026-10-31T15:47:46.550854+00:00",
+  "params": {
+    "generator": "openai/gpt-oss-120b",
+    "judge": "openai/gpt-oss-120b",
+    "retrieval_top_k": 12,
+    "answer_context_chunks": 6,
+    "hybrid_enabled": true,
+    "rerank_enabled": true,
+    "n_questions": 4,
+    "ragas_scored": true
+  },
+  "averages": {
+    "faithfulness": 1.0,
+    "answer_relevancy": null,
+    "context_precision": 0.83333333325,
+    "context_recall": 0.875,
+    "hit_rate": 1.0,
+    "citation_accuracy": 1.0,
+    "refusal_accuracy": 1.0
+  },
+  "per_question": [
+    {
+      "id": "f01",
+      "category": "factual",
+      "question": "How many earned leaves do employees get per year?",
+      "answer": "Employees receive **24 earned leaves per year**\u30101\u3011.",
+      "refused": false,
+      "retrieved_doc_ids": [
+        "pub-leave-policy",
+        "pub-leave-policy",
+        "hr-manager-handbook",
+        "lead-restructuring",
+        "pub-benefits",
+        "hr-promotion-criteria",
+        "pub-leave-policy",
+        "pub-benefits",
+        "pub-leave-policy",
+        "pub-holidays-2026",
+        "pub-leave-policy",
+        "pub-holidays-2026"
+      ],
+      "cited_doc_ids": [
+        "pub-leave-policy"
+      ],
+      "reference_doc_ids": [
+        "pub-leave-policy"
+      ],
+      "hit_rate": 1.0,
+      "citation_accuracy": 1.0,
+      "refusal_correct": true,
+      "faithfulness": 1.0,
+      "answer_relevancy": null,
+      "context_precision": 0.9999999999,
+      "context_recall": 1.0
+    },
+    {
+      "id": "t04",
+      "category": "table",
+      "question": "What is the total Q2 FY27 budget?",
+      "answer": "The total Q2\u202fFY27 budget is **\u20b936\u202fcrore**\u30101\u3011.",
+      "refused": false,
+      "retrieved_doc_ids": [
+        "fin-q2-budget",
+        "hr-hiring-plan",
+        "lead-board-notes",
+        "lead-ma-shortlist",
+        "hr-salary-bands",
+        "hr-hiring-plan",
+        "lead-board-notes",
+        "hr-hiring-plan",
+        "lead-restructuring",
+        "pub-benefits",
+        "hr-promotion-criteria",
+        "fin-vendor-contracts"
+      ],
+      "cited_doc_ids": [
+        "fin-q2-budget"
+      ],
+      "reference_doc_ids": [
+        "fin-q2-budget"
+      ],
+      "hit_rate": 1.0,
+      "citation_accuracy": 1.0,
+      "refusal_correct": true,
+      "faithfulness": 1.0,
+      "answer_relevancy": null,
+      "context_precision": 0.9999999999,
+      "context_recall": 1.0
+    },
+    {
+      "id": "m03",
+      "category": "multi_hop",
+      "question": "What is the SEV1 response target, and which error-code incident had a 42-minute outage?",
+      "answer": "The SEV1 response target is **15\u202fminutes**\u30101\u3011.  \nThe incident with a **42\u2011minute** outage is **ERR\u20114021**\u30104\u3011.",
+      "refused": false,
+      "retrieved_doc_ids": [
+        "eng-oncall-runbook",
+        "eng-pm-search",
+        "eng-pm-auth",
+        "eng-pm-payments",
+        "eng-pm-search",
+        "eng-pm-auth",
+        "eng-pm-payments",
+        "pub-it-security",
+        "eng-oncall-runbook",
+        "eng-oncall-runbook",
+        "eng-api-standards",
+        "eng-pm-payments"
+      ],
+      "cited_doc_ids": [
+        "eng-oncall-runbook",
+        "eng-pm-payments"
+      ],
+      "reference_doc_ids": [
+        "eng-oncall-runbook",
+        "eng-pm-payments"
+      ],
+      "hit_rate": 1.0,
+      "citation_accuracy": 1.0,
+      "refusal_correct": true,
+      "faithfulness": 1.0,
+      "answer_relevancy": null,
+      "context_precision": 0.9999999999,
+      "context_recall": 1.0
+    },
+    {
+      "id": "k01",
+      "category": "keyword",
+      "question": "What was the root cause of incident ERR-4021?",
+      "answer": "The payments service exhausted its database connection pool\u2014a traffic spike together with a slow downstream query kept connections open, and the pool size of\u202f20 was too small to handle the load\u30103\u3011.",
+      "refused": false,
+      "retrieved_doc_ids": [
+        "eng-pm-payments",
+        "eng-pm-auth",
+        "eng-pm-payments",
+        "eng-pm-search",
+        "eng-oncall-runbook",
+        "pub-it-security",
+        "eng-api-standards",
+        "eng-pm-search",
+        "eng-oncall-runbook",
+        "eng-oncall-runbook",
+        "pub-code-of-conduct",
+        "eng-pm-auth"
+      ],
+      "cited_doc_ids": [
+        "eng-pm-payments"
+      ],
+      "reference_doc_ids": [
+        "eng-pm-payments"
+      ],
+      "hit_rate": 1.0,
+      "citation_accuracy": 1.0,
+      "refusal_correct": true,
+      "faithfulness": 1.0,
+      "answer_relevancy": null,
+      "context_precision": 0.3333333333,
+      "context_recall": 0.5
+    }
+  ]
+}
