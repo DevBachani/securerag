@@ -38,6 +38,12 @@ def _after_grounding(state: AgentState) -> str:
     return "refuse"
 
 
+def _after_approval(state: AgentState) -> str:
+    """Route after the human decision: create the ticket or cancel."""
+    decision = state.get("approval_decision") or {}
+    return "create" if decision.get("approve") else "cancelled"
+
+
 def build_graph() -> StateGraph:
     """Build the (uncompiled) self-correcting agent graph."""
     graph = StateGraph(AgentState)
@@ -50,14 +56,17 @@ def build_graph() -> StateGraph:
     graph.add_node("check_grounding", nodes.check_grounding)
     graph.add_node("refuse", nodes.refuse)
     graph.add_node("decline", nodes.decline)
-    graph.add_node("action", nodes.action_stub)
+    graph.add_node("draft_ticket", nodes.draft_ticket_node)
+    graph.add_node("approval", nodes.approval_node)
+    graph.add_node("create_ticket", nodes.create_ticket_node)
+    graph.add_node("cancelled", nodes.cancelled_node)
 
     graph.add_edge(START, "condense")
     graph.add_edge("condense", "route")
     graph.add_conditional_edges(
         "route",
         lambda state: state["route"],
-        {"knowledge": "retrieve", "action": "action", "out_of_scope": "decline"},
+        {"knowledge": "retrieve", "action": "draft_ticket", "out_of_scope": "decline"},
     )
     graph.add_edge("retrieve", "grade_context")
     graph.add_conditional_edges(
@@ -73,8 +82,16 @@ def build_graph() -> StateGraph:
         {"end": END, "generate": "generate", "refuse": "refuse"},
     )
     graph.add_edge("refuse", END)
-    graph.add_edge("action", END)
     graph.add_edge("decline", END)
+    # Action path: draft -> wait for human approval -> create or cancel.
+    graph.add_edge("draft_ticket", "approval")
+    graph.add_conditional_edges(
+        "approval",
+        _after_approval,
+        {"create": "create_ticket", "cancelled": "cancelled"},
+    )
+    graph.add_edge("create_ticket", END)
+    graph.add_edge("cancelled", END)
     return graph
 
 
@@ -87,21 +104,50 @@ def get_compiled_graph():
     return build_graph().compile(checkpointer=SqliteSaver(conn))
 
 
+def _result(state: dict[str, Any]) -> dict[str, Any]:
+    """Normalise a graph result, flagging whether it paused for approval."""
+    return {
+        "answer": state.get("answer", ""),
+        "citations": state.get("citations", []),
+        "retrieved": state.get("retrieved", []),
+        "refused": state.get("refused", False),
+        "route": state.get("route", ""),
+        "pending_ticket": state.get("pending_ticket"),
+        "ticket_id": state.get("ticket_id"),
+        "interrupted": bool(state.get("__interrupt__")),
+    }
+
+
 def run_agent(question: str, principal: Principal, thread_id: str) -> dict[str, Any]:
-    """Run one turn of the agent for `principal` on conversation `thread_id`."""
-    final = get_compiled_graph().invoke(
+    """Run one turn of the agent; may pause (interrupted) awaiting ticket approval."""
+    result = get_compiled_graph().invoke(
         {
             "messages": [HumanMessage(question)],
             "question": question,
             "user_id": principal.id,
             "user_groups": principal.groups,
+            "thread_id": thread_id,
         },
         config={"configurable": {"thread_id": thread_id}},
     )
-    return {
-        "answer": final.get("answer", ""),
-        "citations": final.get("citations", []),
-        "retrieved": final.get("retrieved", []),
-        "refused": final.get("refused", False),
-        "route": final.get("route", ""),
-    }
+    return _result(result)
+
+
+def resume_ticket(
+    thread_id: str,
+    approve: bool,
+    edited_title: str | None = None,
+    acting_user_id: str | None = None,
+) -> dict[str, Any]:
+    """Resume a paused approval with the human's decision (approve/reject)."""
+    from langgraph.types import Command
+
+    decision: dict[str, Any] = {"approve": approve}
+    if edited_title:
+        decision["edited_title"] = edited_title
+    if acting_user_id:
+        decision["acting_user_id"] = acting_user_id
+    result = get_compiled_graph().invoke(
+        Command(resume=decision), config={"configurable": {"thread_id": thread_id}}
+    )
+    return _result(result)

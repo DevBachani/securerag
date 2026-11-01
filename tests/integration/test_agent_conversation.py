@@ -11,7 +11,7 @@ import uuid
 
 import pytest
 
-from securerag.agent.graph import run_agent
+from securerag.agent.graph import resume_ticket, run_agent
 from securerag.ingestion.pipeline import get_qdrant_client
 from securerag.retrieval.permissions import Principal
 
@@ -46,3 +46,23 @@ def test_followup_is_condensed_and_answered():
 def test_out_of_scope_is_declined():
     result = run_agent("hello, how is your day going?", CEO, f"test-{uuid.uuid4().hex[:8]}")
     assert result["route"] == "out_of_scope"
+
+
+def test_ticket_approve_flow_creates_ticket():
+    thread = f"tkt-{uuid.uuid4().hex[:8]}"
+    first = run_agent("My laptop screen is broken, please raise a ticket", CEO, thread)
+    assert first["route"] == "action"
+    assert first["interrupted"] is True
+    assert first["pending_ticket"] is not None
+
+    final = resume_ticket(thread, approve=True, acting_user_id="u_ceo")
+    assert final["ticket_id"] is not None
+
+
+def test_ticket_reject_flow_creates_nothing():
+    thread = f"tkt-{uuid.uuid4().hex[:8]}"
+    first = run_agent("Please raise a ticket for a new monitor", CEO, thread)
+    assert first["interrupted"] is True
+
+    final = resume_ticket(thread, approve=False, acting_user_id="u_ceo")
+    assert final["ticket_id"] is None

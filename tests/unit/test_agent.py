@@ -11,7 +11,8 @@ def test_graph_has_expected_nodes():
     node_ids = set(compiled.get_graph().nodes)
     for name in [
         "condense", "route", "retrieve", "grade_context", "rewrite",
-        "generate", "check_grounding", "refuse", "decline", "action",
+        "generate", "check_grounding", "refuse", "decline",
+        "draft_ticket", "approval", "create_ticket", "cancelled",
     ]:
         assert name in node_ids
 

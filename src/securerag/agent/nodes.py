@@ -11,11 +11,13 @@ from types import SimpleNamespace
 from typing import Any
 
 from langchain_core.messages import AIMessage, HumanMessage
+from langgraph.types import interrupt
 
 from ..config import get_settings
 from ..providers import get_langchain_llm
 from ..retrieval.permissions import Principal
 from ..retrieval.retriever import retrieve
+from . import tools
 from .prompts import (
     CONDENSE_PROMPT,
     DECLINE_MESSAGE,
@@ -30,9 +32,6 @@ from .prompts import (
     format_context,
 )
 from .state import AgentState, ContextGrade, GroundingCheck, RouteDecision
-
-# Placeholder answer for action requests until the ticket tool lands in Phase 13.
-ACTION_COMING_SOON = "Creating tickets isn't available yet - it's coming soon."
 
 
 def _history_text(messages: list) -> str:
@@ -180,10 +179,50 @@ def decline(state: AgentState) -> dict[str, Any]:
     return {"answer": DECLINE_MESSAGE, "refused": False, "messages": [AIMessage(DECLINE_MESSAGE)]}
 
 
-def action_stub(state: AgentState) -> dict[str, Any]:
-    """Stand in for the ticket action until the real tool arrives in Phase 13."""
+def draft_ticket_node(state: AgentState) -> dict[str, Any]:
+    """Draft a ticket from the request and present it for approval (not yet created)."""
+    draft = tools.draft_ticket(state["standalone_question"], state["user_id"])
+    summary = (
+        "Here is a draft ticket for your approval:\n"
+        f"- Title: {draft['title']}\n"
+        f"- Department: {draft['department']}  |  Priority: {draft['priority']}\n"
+        f"- Description: {draft['description']}\n\n"
+        "Approve to create it, or reject to cancel."
+    )
+    return {"pending_ticket": draft, "answer": summary, "messages": [AIMessage(summary)]}
+
+
+def approval_node(state: AgentState) -> dict[str, Any]:
+    """Pause the graph and wait for a human approval decision (interrupt/resume)."""
+    decision = interrupt({"action": "approve_ticket", "draft": state["pending_ticket"]})
+    return {"approval_decision": decision}
+
+
+def create_ticket_node(state: AgentState) -> dict[str, Any]:
+    """Create the approved ticket -- but only if the approver is the requester."""
+    decision = state.get("approval_decision") or {}
+    acting_user = decision.get("acting_user_id", state["user_id"])
+    if acting_user != state["user_id"]:
+        message = "You can only approve your own ticket requests."
+        return {"answer": message, "pending_ticket": None, "messages": [AIMessage(message)]}
+
+    draft = dict(state["pending_ticket"])
+    if decision.get("edited_title"):
+        draft["title"] = decision["edited_title"]
+    ticket = tools.create_ticket(draft, state["user_id"], state["thread_id"])
+    message = (
+        f"Ticket #{ticket.id} created: '{ticket.title}' "
+        f"({ticket.department}, {ticket.priority})."
+    )
     return {
-        "answer": ACTION_COMING_SOON,
+        "ticket_id": ticket.id,
+        "answer": message,
         "pending_ticket": None,
-        "messages": [AIMessage(ACTION_COMING_SOON)],
+        "messages": [AIMessage(message)],
     }
+
+
+def cancelled_node(state: AgentState) -> dict[str, Any]:
+    """Acknowledge a rejected ticket; nothing is created."""
+    message = "No problem - I won't create that ticket."
+    return {"answer": message, "pending_ticket": None, "messages": [AIMessage(message)]}

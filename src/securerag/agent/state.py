@@ -54,5 +54,8 @@ class AgentState(TypedDict, total=False):
     answer: str
     citations: list[dict[str, Any]]
     refused: bool
-    pending_ticket: dict[str, Any] | None  # Phase 13
+    pending_ticket: dict[str, Any] | None  # Phase 13: drafted, awaiting approval
+    approval_decision: dict[str, Any]  # Phase 13: {approve, edited_title?, acting_user_id?}
+    ticket_id: int | None  # Phase 13: created ticket id
+    thread_id: str  # Phase 13: conversation id (ticket idempotency key)
     trace_id: str  # Phase 16

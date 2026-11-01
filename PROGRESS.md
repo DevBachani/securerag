@@ -1,6 +1,6 @@
 # PROGRESS
 
-## Current phase: 13 — Ticket tool with human approval
+## Current phase: 14 — Guardrails and prompt-injection defense
 ## Status: not started
 
 ## Environment
@@ -26,6 +26,7 @@
 | 10 — PII redaction at ingestion | 2026-10-31 | feat(governance): PII redaction with Indian ID recognizers | Regex redactor (EMAIL/+91 PHONE/AADHAAR/PAN) runs before embedding; pii_redacted flag. disciplinary-log trap. 0 planted PII across 132 chunks; budgets intact. 119 tests. |
 | 11 — LangGraph agent (router + memory) | 2026-11-01 | feat(agent): langgraph agent with router, memory and checkpointer | State graph: condense -> route (structured) -> retrieve -> generate / action-stub / decline. SQLite checkpointer (thread_id memory). Follow-up condensing + routing + permission refusal verified. docs/graph.png. 121 tests (+2 opt-in). |
 | 12 — Self-correcting retrieval | 2026-11-01 | feat(agent): context grading, query rewriting and grounding check | grade_context -> rewrite (max 2) -> retrieve loop; check_grounding -> regenerate once -> refuse. Refusal never reveals a restricted doc. ~4s/question overhead (grade+grounding). 123 tests (+2 opt-in). |
+| 13 — Ticket tool + human approval | 2026-11-01 | feat(agent): ticket tool with human-in-the-loop approval | tickets table; draft_ticket (LLM) -> interrupt -> approve: create_ticket / reject: cancel. Idempotent per thread_id; tickets created as self; non-owner can't approve. 128 tests (+4 opt-in). |
 
 ## Key decisions (and why)
 - LLM = Ollama / llama3.1:latest (local): no API key, no free-tier limits; machine already has it installed.
@@ -65,6 +66,9 @@
   function_calling structured output; use with_structured_output(..., method="json_schema") instead.
   Self-correction is a config flag (self_correction_enabled); measured ~+4s/question for grade+grounding.
   Honest: on this strong-retrieval corpus it rarely changes outcomes (its value is noisy/large corpora).
+- Phase 13: human approval is a LangGraph interrupt() (enforced by the graph + checkpointer, outside the
+  LLM). Tickets are created as the requesting user; create_ticket is idempotent per thread_id (unique), so
+  double-resume creates one ticket. A non-owner cannot approve another user's pending ticket.
 - Embeddings = BAAI/bge-small-en-v1.5 via fastembed (384-dim), NOT Ollama's nomic-embed-text (768-dim):
   the whole retrieval design (Qdrant collection size, chunk payload, "prints 384" check) is built around 384.
 - GitHub: local repo only for now; no remote pushed yet.

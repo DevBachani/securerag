@@ -44,6 +44,27 @@ class User(SQLModel, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
+class Ticket(SQLModel, table=True):
+    """A support ticket the agent drafts and the user approves before creation.
+
+    `thread_id` links a ticket to the conversation that created it and is unique, so
+    resuming the same approval twice can never create two tickets (idempotency).
+    """
+
+    __tablename__ = "tickets"
+
+    id: int | None = Field(default=None, primary_key=True)
+    created_by: str  # the requesting user's id; tickets are always created as that user
+    title: str
+    description: str
+    department: str
+    priority: str
+    status: str = "pending_approval"  # pending_approval | approved | rejected | created
+    thread_id: str | None = Field(default=None, index=True, unique=True)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    approved_at: datetime | None = None
+
+
 class IngestState(SQLModel, table=True):
     """Per-document ingestion state, so sync only touches what changed.
 

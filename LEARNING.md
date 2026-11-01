@@ -196,3 +196,21 @@ Lessons:
   it's mostly overhead - which is why it's a flag.
 
 _(add your own reflection: why cap retries, why refusal must not reveal restricted docs, is the cost worth it)_
+
+## Phase 13 — Ticket tool with human-in-the-loop approval
+
+Added the tickets table + agent/tools.py (draft_ticket via LLM, create_ticket to DB). Graph: action ->
+draft_ticket -> approval (LangGraph interrupt) -> approve: create_ticket / reject: cancelled. resume_ticket()
+drives it with Command(resume=...). Verified live (opt-in): approve creates a ticket, reject creates none.
+
+Rules enforced + tested (DB-only unit tests, no LLM): approve -> 1 ticket, reject -> 0, double-resume -> 1
+(idempotent on thread_id), non-owner cannot approve. 128 tests (+4 opt-in).
+
+Lessons:
+- **The approval gate lives outside the LLM** - interrupt() + checkpointer make the pause structural, so a
+  prompt injection can't talk the agent into taking the action.
+- **Idempotency is mandatory for side-effecting actions.** Deterministic key (thread_id) + check-before-
+  insert makes retries/double-resume safe.
+- **Act as the authenticated user, never on someone's behalf** - the create node rejects a non-owner approver.
+
+_(add your own reflection: approval outside the LLM, idempotency, which actions need human approval)_

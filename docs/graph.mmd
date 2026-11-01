@@ -14,23 +14,30 @@ graph TD;
 	check_grounding(check_grounding)
 	refuse(refuse)
 	decline(decline)
-	action(action)
+	draft_ticket(draft_ticket)
+	approval(approval)
+	create_ticket(create_ticket)
+	cancelled(cancelled)
 	__end__([<p>__end__</p>]):::last
 	__start__ --> condense;
+	approval -.-> cancelled;
+	approval -. &nbsp;create&nbsp; .-> create_ticket;
 	check_grounding -. &nbsp;end&nbsp; .-> __end__;
 	check_grounding -.-> generate;
 	check_grounding -.-> refuse;
 	condense --> route;
+	draft_ticket --> approval;
 	generate --> check_grounding;
 	grade_context -.-> generate;
 	grade_context -.-> refuse;
 	grade_context -.-> rewrite;
 	retrieve --> grade_context;
 	rewrite --> retrieve;
-	route -.-> action;
 	route -. &nbsp;out_of_scope&nbsp; .-> decline;
+	route -. &nbsp;action&nbsp; .-> draft_ticket;
 	route -. &nbsp;knowledge&nbsp; .-> retrieve;
-	action --> __end__;
+	cancelled --> __end__;
+	create_ticket --> __end__;
 	decline --> __end__;
 	refuse --> __end__;
 	classDef default fill:#f2f0ff,line-height:1.2
