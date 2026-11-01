@@ -66,6 +66,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 REPO = Path(__file__).resolve().parents[1]
 GOLDEN = REPO / "eval" / "golden_set.jsonl"
 LEAKAGE = REPO / "eval" / "leakage_set.jsonl"
+INJECTION = REPO / "eval" / "injection_set.jsonl"
 RESULTS_DIR = REPO / "eval" / "results"
 
 # Ragas df column name -> friendly metric name used in our output.
@@ -279,6 +280,46 @@ def run_leakage(config_name: str) -> dict:
     return payload
 
 
+def run_injection(config_name: str) -> dict:
+    """Run the injection set and report attack_success_rate (data leakage, retrieval-only).
+
+    An attack 'succeeds' if a forbidden document is retrieved despite the injection.
+    The permission filter should make this 0 regardless of the prompt wording.
+    """
+    lines = INJECTION.read_text(encoding="utf-8").splitlines()
+    rows = [json.loads(line) for line in lines if line.strip()]
+    per_question = []
+    for row in rows:
+        principal = load_principal(row["user_id"])
+        retrieved_ids = [r.doc_id for r in retrieve(row["question"], principal)]
+        success = leakage(retrieved_ids, [], row["forbidden_doc_ids"])
+        per_question.append(
+            {
+                "id": row["id"],
+                "user_id": row["user_id"],
+                "attack_type": row["attack_type"],
+                "question": row["question"],
+                "forbidden_doc_ids": row["forbidden_doc_ids"],
+                "retrieved_doc_ids": retrieved_ids,
+                "attack_success": success,
+            }
+        )
+    rate = mean_ignoring_none([p["attack_success"] for p in per_question])
+
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = RESULTS_DIR / f"{datetime.now(UTC).strftime('%Y%m%d')}_{config_name}.json"
+    payload = {
+        "config_name": config_name,
+        "timestamp": datetime.now(UTC).isoformat(),
+        "averages": {"attack_success_rate": rate},
+        "per_question": per_question,
+    }
+    out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print(f"Saved: {out_path.relative_to(REPO)}")
+    print(f"attack_success_rate (data leakage): {rate:.4f}  (target 0.0) over {len(rows)} attacks")
+    return payload
+
+
 def run_retrieval_only(config_name: str) -> dict:
     """Score hit_rate@k over the golden set from RETRIEVAL alone (no LLM).
 
@@ -354,6 +395,11 @@ def main() -> None:
         help="Score hit_rate@k over the golden set from retrieval only (no LLM).",
     )
     parser.add_argument(
+        "--injection",
+        action="store_true",
+        help="Run the injection set and report attack_success_rate (retrieval-only, no LLM).",
+    )
+    parser.add_argument(
         "--agent",
         action="store_true",
         help="Generate answers via the LangGraph agent instead of the plain pipeline.",
@@ -363,6 +409,9 @@ def main() -> None:
     load_dotenv()
     if args.leakage:
         run_leakage(args.config_name if args.config_name != "baseline" else "leakage")
+        return
+    if args.injection:
+        run_injection(args.config_name if args.config_name != "baseline" else "injection")
         return
     if args.retrieval_only:
         run_retrieval_only(args.config_name)

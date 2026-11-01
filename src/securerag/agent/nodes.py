@@ -17,7 +17,7 @@ from ..config import get_settings
 from ..providers import get_langchain_llm
 from ..retrieval.permissions import Principal
 from ..retrieval.retriever import retrieve
-from . import tools
+from . import guardrails, tools
 from .prompts import (
     CONDENSE_PROMPT,
     DECLINE_MESSAGE,
@@ -44,15 +44,19 @@ def _history_text(messages: list) -> str:
 
 
 def condense(state: AgentState) -> dict[str, Any]:
-    """Rewrite a follow-up into a standalone question using the chat history."""
+    """Rewrite a follow-up into a standalone question; flag injection attempts."""
     question = state["question"]
+    flagged = guardrails.detect_injection(question)
+    if flagged:
+        guardrails.logger.warning("injection attempt flagged for user=%s", state.get("user_id"))
+
     history = _history_text(state.get("messages", []))
     if not history.strip():
-        return {"standalone_question": question}
+        return {"standalone_question": question, "injection_flagged": flagged}
     response = get_langchain_llm().invoke(
         CONDENSE_PROMPT.format(history=history, question=question)
     )
-    return {"standalone_question": response.content.strip()}
+    return {"standalone_question": response.content.strip(), "injection_flagged": flagged}
 
 
 def route(state: AgentState) -> dict[str, Any]:
@@ -148,7 +152,10 @@ def generate(state: AgentState) -> dict[str, Any]:
 
     limit = get_settings().answer_context_chunks
     chunks = [SimpleNamespace(**d) for d in retrieved[:limit]]
-    response = get_langchain_llm().invoke(build_answer_prompt(state["standalone_question"], chunks))
+    guard_note = guardrails.STRICTER_NOTE if state.get("injection_flagged") else ""
+    response = get_langchain_llm().invoke(
+        build_answer_prompt(state["standalone_question"], chunks, guard_note=guard_note)
+    )
     text = response.content.strip()
 
     citations = []
@@ -164,6 +171,20 @@ def generate(state: AgentState) -> dict[str, Any]:
                     "page": chunk.page,
                 }
             )
+
+    # Output validation (defense in depth): never cite a doc not retrieved for this user.
+    cited_ids = [c["doc_id"] for c in citations]
+    allowed_ids = [c.doc_id for c in chunks]
+    if citations and not guardrails.validate_citations(cited_ids, allowed_ids):
+        guardrails.logger.error("citation validation failed; refusing (user=%s)", state["user_id"])
+        return {
+            "answer": REFUSAL,
+            "citations": [],
+            "refused": True,
+            "generations": generations,
+            "messages": [AIMessage(REFUSAL)],
+        }
+
     refused = "don't have enough information" in text.lower()
     return {
         "answer": text,

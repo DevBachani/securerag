@@ -46,6 +46,7 @@ class AgentState(TypedDict, total=False):
     user_id: str  # permission context from the session, never from the LLM
     user_groups: list[str]
     route: str  # knowledge | action | out_of_scope
+    injection_flagged: bool  # Phase 14: input looked like a manipulation attempt
     retrieved: list[dict[str, Any]]  # retrieved chunks (as dicts, checkpoint-safe)
     search_query: str  # Phase 12: rewritten query used for retrieval
     rewrites: int  # Phase 12: query-rewrite retry count

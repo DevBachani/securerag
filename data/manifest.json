@@ -107,6 +107,19 @@
       "supersedes": null
     },
     {
+      "doc_id": "pub-newsletter-oct",
+      "path": "public/newsletter_oct.md",
+      "title": "Acme Monthly - October 2026",
+      "department": "public",
+      "allowed_groups": ["all"],
+      "allowed_users": [],
+      "sensitivity": "public",
+      "owner": "u_hrm",
+      "version": "1.0",
+      "effective_date": "2026-10-01",
+      "supersedes": null
+    },
+    {
       "doc_id": "pub-onboarding",
       "path": "public/onboarding_guide.md",
       "title": "Onboarding Guide",

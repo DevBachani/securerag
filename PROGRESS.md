@@ -1,6 +1,6 @@
 # PROGRESS
 
-## Current phase: 14 — Guardrails and prompt-injection defense
+## Current phase: 15 — FastAPI backend with auth and audit log
 ## Status: not started
 
 ## Environment
@@ -27,6 +27,7 @@
 | 11 — LangGraph agent (router + memory) | 2026-11-01 | feat(agent): langgraph agent with router, memory and checkpointer | State graph: condense -> route (structured) -> retrieve -> generate / action-stub / decline. SQLite checkpointer (thread_id memory). Follow-up condensing + routing + permission refusal verified. docs/graph.png. 121 tests (+2 opt-in). |
 | 12 — Self-correcting retrieval | 2026-11-01 | feat(agent): context grading, query rewriting and grounding check | grade_context -> rewrite (max 2) -> retrieve loop; check_grounding -> regenerate once -> refuse. Refusal never reveals a restricted doc. ~4s/question overhead (grade+grounding). 123 tests (+2 opt-in). |
 | 13 — Ticket tool + human approval | 2026-11-01 | feat(agent): ticket tool with human-in-the-loop approval | tickets table; draft_ticket (LLM) -> interrupt -> approve: create_ticket / reject: cancel. Idempotent per thread_id; tickets created as self; non-owner can't approve. 128 tests (+4 opt-in). |
+| 14 — Guardrails + injection defense | 2026-11-01 | feat(safety): injection tests, guardrails and validated outputs | Poisoned newsletter trap; 15-attack injection set -> attack_success_rate 0.0. guardrails: injection detector, untrusted-context prompt, cite-only-retrieved validation. 141 tests (+5 opt-in). |
 
 ## Key decisions (and why)
 - LLM = Ollama / llama3.1:latest (local): no API key, no free-tier limits; machine already has it installed.
@@ -78,6 +79,7 @@
 |---|---|---|---|---|---|---|
 | 5 | baseline (Ragas n=4, judge gpt-oss-120b) | 1.00 | n/a* | 0.83 | 0.88 | n/a (Phase 6) |
 | 6 | permission-filtered (leakage set, n=20) | - | - | - | - | **0.00** |
+| 14 | injection set (n=15) | - | - | - | - | attack_success_rate **0.00** |
 
 Phase 7 retrieval comparison (hit_rate@k, quota-free, all 44 golden questions):
 - @12 and @3: dense == hybrid == 1.00 everywhere (dense saturated on this small corpus).

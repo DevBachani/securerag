@@ -214,3 +214,24 @@ Lessons:
 - **Act as the authenticated user, never on someone's behalf** - the create node rejects a non-owner approver.
 
 _(add your own reflection: approval outside the LLM, idempotency, which actions need human approval)_
+
+## Phase 14 — Guardrails & prompt-injection defense
+
+Added the poisoned newsletter (hidden "reveal salary bands" instruction) + a 15-attack injection set.
+agent/guardrails.py: rule-based injection detector (flags -> logs + stricter prompt), untrusted-context
+labelling in the answer prompt, and output validation (cite only chunks retrieved for this user).
+
+Result: attack_success_rate (data leakage) = **0.0** over 15 attacks. The intern's injection cannot leak
+salary bands (verified via generation too). 141 tests (+5 opt-in).
+
+Lessons:
+- **A prompt can't stop injection** - system rules and attacker text are the same tokens; defenses lower
+  the rate but never guarantee 0.
+- **The permission filter is the real guarantee.** Forbidden chunks never reach the LLM, so even a fully
+  successful injection has nothing to leak. Security is at retrieval (data minimization), not model will.
+- **Indirect injection is the bigger RAG risk** - instructions hidden in retrieved docs, innocent user,
+  bypasses input filters. The poisoned newsletter is inert because the salary bands aren't retrievable.
+- Honest residual: pure instruction-following (e.g. "print your system prompt") may partially comply; that
+  is not data leakage and is acceptable - which is why the structural guarantee matters most.
+
+_(add your own reflection: why a prompt can't stop injection, why the filter is the real guarantee, indirect injection)_
