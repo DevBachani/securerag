@@ -63,6 +63,9 @@ class Settings(BaseSettings):
 
     # --- Agent ---
     agent_checkpoint_db: str = "checkpoints.db"  # SQLite file for LangGraph conversation state
+    self_correction_enabled: bool = True  # grade context, rewrite weak queries, check grounding
+    max_rewrites: int = 2  # query-rewrite retries before refusing
+    max_generations: int = 2  # answer attempts (1 regenerate) before refusing on grounding failure
 
     # --- Retrieval ---
     qdrant_url: str = "http://localhost:6333"

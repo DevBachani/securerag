@@ -174,3 +174,25 @@ Lessons:
 - LLM-using tests are opt-in (RUN_LLM_TESTS=1) to protect the free-tier token budget.
 
 _(add your own reflection: what the checkpointer stores, structured output vs parsing, why the LLM must not set identity)_
+
+## Phase 12 — Self-correcting retrieval
+
+Added grade_context (keep only relevant chunks) -> rewrite_query (max 2 retries) -> retrieve loop, and
+check_grounding after generate (regenerate once, then refuse). A dedicated refuse node uses a message that
+never reveals a restricted document exists. All behind self_correction_enabled (A/B flag).
+
+Measured: self-correction adds ~4s/question (2 extra LLM calls: grade + grounding). On this corpus it rarely
+changes outcomes - retrieval is already strong, so grade seldom rejects and grounding seldom fails.
+123 tests (+2 opt-in).
+
+Lessons:
+- **gpt-oss + Groq function-calling structured output is flaky** ("tool not in request.tools"); method=
+  "json_schema" is reliable. Switched route/grade/grounding to it.
+- **Cap the loops.** Unbounded rewrite/regenerate never terminates and burns tokens; 2 rewrites + 1
+  regenerate bound cost and force a clean refusal.
+- **Refusals must not leak existence.** "I couldn't find this in documents you have access to" is
+  indistinguishable from "doesn't exist" - no probing for restricted docs via error messages.
+- **Decide features by measurement.** Self-correction earns its latency only on noisy/large corpora; here
+  it's mostly overhead - which is why it's a flag.
+
+_(add your own reflection: why cap retries, why refusal must not reveal restricted docs, is the cost worth it)_

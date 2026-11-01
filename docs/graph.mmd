@@ -8,19 +8,31 @@ graph TD;
 	condense(condense)
 	route(route)
 	retrieve(retrieve)
+	grade_context(grade_context)
+	rewrite(rewrite)
 	generate(generate)
+	check_grounding(check_grounding)
+	refuse(refuse)
 	decline(decline)
 	action(action)
 	__end__([<p>__end__</p>]):::last
 	__start__ --> condense;
+	check_grounding -. &nbsp;end&nbsp; .-> __end__;
+	check_grounding -.-> generate;
+	check_grounding -.-> refuse;
 	condense --> route;
-	retrieve --> generate;
+	generate --> check_grounding;
+	grade_context -.-> generate;
+	grade_context -.-> refuse;
+	grade_context -.-> rewrite;
+	retrieve --> grade_context;
+	rewrite --> retrieve;
 	route -.-> action;
 	route -. &nbsp;out_of_scope&nbsp; .-> decline;
 	route -. &nbsp;knowledge&nbsp; .-> retrieve;
 	action --> __end__;
 	decline --> __end__;
-	generate --> __end__;
+	refuse --> __end__;
 	classDef default fill:#f2f0ff,line-height:1.2
 	classDef first fill-opacity:0
 	classDef last fill:#bfb6fc

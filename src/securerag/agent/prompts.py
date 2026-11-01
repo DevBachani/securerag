@@ -111,3 +111,35 @@ DECLINE_MESSAGE = (
     "I can only help with questions about Acme's documents or with creating a ticket. "
     "Could you rephrase your request?"
 )
+
+# Shown when retrieval/grounding cannot support an answer. Deliberately does NOT reveal
+# whether a restricted document exists.
+REFUSAL_NO_ACCESS = "I couldn't find this in documents you have access to."
+
+# Grade which retrieved contexts are actually relevant to the question.
+GRADE_PROMPT = """You are grading retrieved context for relevance to a question.
+Return the 1-based indices of the context items that are relevant and would help answer
+the question. If none are relevant, return an empty list.
+
+Question: {question}
+
+Context:
+{context}"""
+
+# Rewrite a weak question into a better search query.
+REWRITE_PROMPT = """The previous search did not find relevant context. Rewrite the question \
+into a better search query: expand abbreviations, add likely keywords and synonyms, and \
+keep it concise. Return ONLY the rewritten query.
+
+Question: {question}
+Rewritten search query:"""
+
+# Verify the answer is grounded in the cited context.
+GROUNDING_PROMPT = """Check whether EVERY claim in the answer is supported by the context.
+Return grounded=true only if all claims are supported; otherwise grounded=false.
+
+Context:
+{context}
+
+Answer:
+{answer}"""

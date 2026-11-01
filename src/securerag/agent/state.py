@@ -22,6 +22,21 @@ class RouteDecision(BaseModel):
     )
 
 
+class ContextGrade(BaseModel):
+    """Structured output of grade_context: which numbered contexts are relevant."""
+
+    relevant_indices: list[int] = Field(
+        default_factory=list,
+        description="1-based indices of the context items relevant to the question.",
+    )
+
+
+class GroundingCheck(BaseModel):
+    """Structured output of check_grounding: whether every claim is supported."""
+
+    grounded: bool = Field(description="True if every claim in the answer is supported.")
+
+
 class AgentState(TypedDict, total=False):
     """State threaded through the LangGraph agent (partial updates per node)."""
 
@@ -32,7 +47,10 @@ class AgentState(TypedDict, total=False):
     user_groups: list[str]
     route: str  # knowledge | action | out_of_scope
     retrieved: list[dict[str, Any]]  # retrieved chunks (as dicts, checkpoint-safe)
+    search_query: str  # Phase 12: rewritten query used for retrieval
     rewrites: int  # Phase 12: query-rewrite retry count
+    generations: int  # Phase 12: number of answer attempts (grounding retries)
+    grounded: bool  # Phase 12: did the grounding check pass
     answer: str
     citations: list[dict[str, Any]]
     refused: bool

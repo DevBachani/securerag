@@ -1,6 +1,6 @@
 # PROGRESS
 
-## Current phase: 12 — Self-correcting retrieval
+## Current phase: 13 — Ticket tool with human approval
 ## Status: not started
 
 ## Environment
@@ -25,6 +25,7 @@
 | 9 — Incremental sync + versioning | 2026-10-31 | feat(ingestion): incremental sync, deletions, versioning and ACL updates | ingest_state (SHA-256 content_hash + meta_hash); sync only re-embeds changed files, deletes removed, updates payload on ACL change. travel v1 trap, is_current filter. ingest.py default=sync. 99 tests. |
 | 10 — PII redaction at ingestion | 2026-10-31 | feat(governance): PII redaction with Indian ID recognizers | Regex redactor (EMAIL/+91 PHONE/AADHAAR/PAN) runs before embedding; pii_redacted flag. disciplinary-log trap. 0 planted PII across 132 chunks; budgets intact. 119 tests. |
 | 11 — LangGraph agent (router + memory) | 2026-11-01 | feat(agent): langgraph agent with router, memory and checkpointer | State graph: condense -> route (structured) -> retrieve -> generate / action-stub / decline. SQLite checkpointer (thread_id memory). Follow-up condensing + routing + permission refusal verified. docs/graph.png. 121 tests (+2 opt-in). |
+| 12 — Self-correcting retrieval | 2026-11-01 | feat(agent): context grading, query rewriting and grounding check | grade_context -> rewrite (max 2) -> retrieve loop; check_grounding -> regenerate once -> refuse. Refusal never reveals a restricted doc. ~4s/question overhead (grade+grounding). 123 tests (+2 opt-in). |
 
 ## Key decisions (and why)
 - LLM = Ollama / llama3.1:latest (local): no API key, no free-tier limits; machine already has it installed.
@@ -60,6 +61,10 @@
 - Phase 11: permission context (user_id, user_groups) lives in agent STATE, set from the session, never
   by the LLM. Routing uses structured output (Pydantic Literal). SQLite checkpointer persists per thread_id.
   Agent integration tests are opt-in (RUN_LLM_TESTS=1) so routine test runs don't spend Groq tokens.
+- Phase 12 (rule #10): gpt-oss on Groq throws a tool-call-validation error with the default
+  function_calling structured output; use with_structured_output(..., method="json_schema") instead.
+  Self-correction is a config flag (self_correction_enabled); measured ~+4s/question for grade+grounding.
+  Honest: on this strong-retrieval corpus it rarely changes outcomes (its value is noisy/large corpora).
 - Embeddings = BAAI/bge-small-en-v1.5 via fastembed (384-dim), NOT Ollama's nomic-embed-text (768-dim):
   the whole retrieval design (Qdrant collection size, chunk payload, "prints 384" check) is built around 384.
 - GitHub: local repo only for now; no remote pushed yet.

@@ -20,13 +20,35 @@ from . import nodes
 from .state import AgentState
 
 
+def _after_grade(state: AgentState) -> str:
+    """Route after grading: answer if relevant context, else rewrite or refuse."""
+    if state.get("retrieved"):
+        return "generate"
+    if state.get("rewrites", 0) < get_settings().max_rewrites:
+        return "rewrite"
+    return "refuse"
+
+
+def _after_grounding(state: AgentState) -> str:
+    """Route after grounding: finish if grounded, else regenerate once, then refuse."""
+    if state.get("grounded", True):
+        return "end"
+    if state.get("generations", 0) < get_settings().max_generations:
+        return "generate"
+    return "refuse"
+
+
 def build_graph() -> StateGraph:
-    """Build the (uncompiled) agent graph."""
+    """Build the (uncompiled) self-correcting agent graph."""
     graph = StateGraph(AgentState)
     graph.add_node("condense", nodes.condense)
     graph.add_node("route", nodes.route)
     graph.add_node("retrieve", nodes.retrieve_node)
+    graph.add_node("grade_context", nodes.grade_context)
+    graph.add_node("rewrite", nodes.rewrite_query)
     graph.add_node("generate", nodes.generate)
+    graph.add_node("check_grounding", nodes.check_grounding)
+    graph.add_node("refuse", nodes.refuse)
     graph.add_node("decline", nodes.decline)
     graph.add_node("action", nodes.action_stub)
 
@@ -37,8 +59,20 @@ def build_graph() -> StateGraph:
         lambda state: state["route"],
         {"knowledge": "retrieve", "action": "action", "out_of_scope": "decline"},
     )
-    graph.add_edge("retrieve", "generate")
-    graph.add_edge("generate", END)
+    graph.add_edge("retrieve", "grade_context")
+    graph.add_conditional_edges(
+        "grade_context",
+        _after_grade,
+        {"generate": "generate", "rewrite": "rewrite", "refuse": "refuse"},
+    )
+    graph.add_edge("rewrite", "retrieve")
+    graph.add_edge("generate", "check_grounding")
+    graph.add_conditional_edges(
+        "check_grounding",
+        _after_grounding,
+        {"end": END, "generate": "generate", "refuse": "refuse"},
+    )
+    graph.add_edge("refuse", END)
     graph.add_edge("action", END)
     graph.add_edge("decline", END)
     return graph

@@ -19,12 +19,17 @@ from ..retrieval.retriever import retrieve
 from .prompts import (
     CONDENSE_PROMPT,
     DECLINE_MESSAGE,
+    GRADE_PROMPT,
+    GROUNDING_PROMPT,
     REFUSAL,
+    REFUSAL_NO_ACCESS,
+    REWRITE_PROMPT,
     ROUTE_PROMPT,
     build_answer_prompt,
     extract_citation_numbers,
+    format_context,
 )
-from .state import AgentState, RouteDecision
+from .state import AgentState, ContextGrade, GroundingCheck, RouteDecision
 
 # Placeholder answer for action requests until the ticket tool lands in Phase 13.
 ACTION_COMING_SOON = "Creating tickets isn't available yet - it's coming soon."
@@ -53,15 +58,16 @@ def condense(state: AgentState) -> dict[str, Any]:
 
 def route(state: AgentState) -> dict[str, Any]:
     """Classify the question into knowledge / action / out_of_scope."""
-    llm = get_langchain_llm().with_structured_output(RouteDecision)
+    llm = get_langchain_llm().with_structured_output(RouteDecision, method="json_schema")
     decision = llm.invoke(ROUTE_PROMPT.format(question=state["standalone_question"]))
     return {"route": decision.route}
 
 
 def retrieve_node(state: AgentState) -> dict[str, Any]:
-    """Retrieve permission-filtered chunks for the standalone question."""
+    """Retrieve permission-filtered chunks (using the rewritten query if present)."""
     principal = Principal(id=state["user_id"], groups=state["user_groups"])
-    hits = retrieve(state["standalone_question"], principal)
+    query = state.get("search_query") or state["standalone_question"]
+    hits = retrieve(query, principal)
     retrieved = [
         {
             "doc_id": h.doc_id,
@@ -78,14 +84,66 @@ def retrieve_node(state: AgentState) -> dict[str, Any]:
     return {"retrieved": retrieved}
 
 
+def grade_context(state: AgentState) -> dict[str, Any]:
+    """Keep only the retrieved chunks the LLM judges relevant to the question.
+
+    Narrows `retrieved` to the relevant subset (possibly empty, which triggers a
+    rewrite or refusal). No-op when self-correction is disabled.
+    """
+    settings = get_settings()
+    retrieved = state.get("retrieved", [])
+    if not settings.self_correction_enabled or not retrieved:
+        return {}
+
+    chunks = retrieved[: settings.answer_context_chunks]
+    context = format_context([SimpleNamespace(**d) for d in chunks])
+    llm = get_langchain_llm().with_structured_output(ContextGrade, method="json_schema")
+    grade = llm.invoke(GRADE_PROMPT.format(question=state["standalone_question"], context=context))
+    relevant = [chunks[i - 1] for i in grade.relevant_indices if 1 <= i <= len(chunks)]
+    return {"retrieved": relevant}
+
+
+def rewrite_query(state: AgentState) -> dict[str, Any]:
+    """Rewrite the question into a better search query and bump the retry count."""
+    response = get_langchain_llm().invoke(
+        REWRITE_PROMPT.format(question=state["standalone_question"])
+    )
+    return {"search_query": response.content.strip(), "rewrites": state.get("rewrites", 0) + 1}
+
+
+def check_grounding(state: AgentState) -> dict[str, Any]:
+    """Verify the answer's claims are supported by the context."""
+    settings = get_settings()
+    if not settings.self_correction_enabled or state.get("refused"):
+        return {"grounded": True}
+
+    chunks = [SimpleNamespace(**d) for d in state.get("retrieved", [])]
+    context = format_context(chunks)
+    llm = get_langchain_llm().with_structured_output(GroundingCheck, method="json_schema")
+    result = llm.invoke(GROUNDING_PROMPT.format(context=context, answer=state["answer"]))
+    return {"grounded": result.grounded}
+
+
+def refuse(state: AgentState) -> dict[str, Any]:
+    """Refuse without revealing whether a restricted document exists."""
+    return {
+        "answer": REFUSAL_NO_ACCESS,
+        "citations": [],
+        "refused": True,
+        "messages": [AIMessage(REFUSAL_NO_ACCESS)],
+    }
+
+
 def generate(state: AgentState) -> dict[str, Any]:
     """Write a cited answer from the retrieved chunks, or refuse if none."""
     retrieved = state.get("retrieved", [])
+    generations = state.get("generations", 0) + 1
     if not retrieved:
         return {
             "answer": REFUSAL,
             "citations": [],
             "refused": True,
+            "generations": generations,
             "messages": [AIMessage(REFUSAL)],
         }
 
@@ -112,6 +170,7 @@ def generate(state: AgentState) -> dict[str, Any]:
         "answer": text,
         "citations": citations,
         "refused": refused,
+        "generations": generations,
         "messages": [AIMessage(text)],
     }
 
