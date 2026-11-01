@@ -1,6 +1,6 @@
 # PROGRESS
 
-## Current phase: 11 — LangGraph agent: state, router and core graph
+## Current phase: 12 — Self-correcting retrieval
 ## Status: not started
 
 ## Environment
@@ -24,6 +24,7 @@
 | 8 — Cross-encoder reranking | 2026-10-31 | feat(retrieval): cross-encoder reranking with latency measurement | bge-reranker-base via fastembed ONNX (no PyTorch). Retrieve wide -> rerank -> top_n. hit_rate stays 1.0 (saturated); rerank adds ~1.3-2.8s median CPU latency. Best pool=8. 91 tests. |
 | 9 — Incremental sync + versioning | 2026-10-31 | feat(ingestion): incremental sync, deletions, versioning and ACL updates | ingest_state (SHA-256 content_hash + meta_hash); sync only re-embeds changed files, deletes removed, updates payload on ACL change. travel v1 trap, is_current filter. ingest.py default=sync. 99 tests. |
 | 10 — PII redaction at ingestion | 2026-10-31 | feat(governance): PII redaction with Indian ID recognizers | Regex redactor (EMAIL/+91 PHONE/AADHAAR/PAN) runs before embedding; pii_redacted flag. disciplinary-log trap. 0 planted PII across 132 chunks; budgets intact. 119 tests. |
+| 11 — LangGraph agent (router + memory) | 2026-11-01 | feat(agent): langgraph agent with router, memory and checkpointer | State graph: condense -> route (structured) -> retrieve -> generate / action-stub / decline. SQLite checkpointer (thread_id memory). Follow-up condensing + routing + permission refusal verified. docs/graph.png. 121 tests (+2 opt-in). |
 
 ## Key decisions (and why)
 - LLM = Ollama / llama3.1:latest (local): no API key, no free-tier limits; machine already has it installed.
@@ -56,6 +57,9 @@
 - Phase 10 (rule #10): used a regex redactor instead of Microsoft Presidio. The policy keeps names and
   redacts only contact/ID PII (all regex-detectable), so Presidio's heavy spaCy NER adds nothing on 8 GB.
   Side effect: org emails (ethics@, secops@) are also redacted to <EMAIL> - acceptable (don't embed emails).
+- Phase 11: permission context (user_id, user_groups) lives in agent STATE, set from the session, never
+  by the LLM. Routing uses structured output (Pydantic Literal). SQLite checkpointer persists per thread_id.
+  Agent integration tests are opt-in (RUN_LLM_TESTS=1) so routine test runs don't spend Groq tokens.
 - Embeddings = BAAI/bge-small-en-v1.5 via fastembed (384-dim), NOT Ollama's nomic-embed-text (768-dim):
   the whole retrieval design (Qdrant collection size, chunk payload, "prints 384" check) is built around 384.
 - GitHub: local repo only for now; no remote pushed yet.

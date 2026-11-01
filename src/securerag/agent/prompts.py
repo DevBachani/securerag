@@ -85,3 +85,29 @@ def extract_citation_numbers(answer: str) -> list[int]:
         if number not in seen:
             seen.append(number)
     return seen
+
+
+# Condense a follow-up into a standalone question using the prior conversation.
+CONDENSE_PROMPT = """Given the conversation so far and a follow-up message, rewrite the \
+follow-up as a standalone question that makes sense without the conversation. If it is \
+already standalone, return it unchanged. Return ONLY the rewritten question.
+
+Conversation:
+{history}
+
+Follow-up: {question}
+Standalone question:"""
+
+# Route a user message to one of three paths.
+ROUTE_PROMPT = """Classify the user's message into exactly one route:
+- "knowledge": a question that should be answered from company documents.
+- "action": a request to perform an action, such as creating/raising a ticket.
+- "out_of_scope": greetings, chit-chat, or anything unrelated to the above.
+
+Message: {question}"""
+
+# Shown when the router decides a message is out of scope.
+DECLINE_MESSAGE = (
+    "I can only help with questions about Acme's documents or with creating a ticket. "
+    "Could you rephrase your request?"
+)

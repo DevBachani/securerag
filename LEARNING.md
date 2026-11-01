@@ -154,3 +154,23 @@ Decisions / lessons:
 - Side effect: org emails (ethics@/secops@) are redacted too - acceptable; we just don't embed any email.
 
 _(add your own reflection: redact at ingestion vs answer time, false positives, ACLs+redaction defense in depth)_
+
+## Phase 11 — LangGraph agent: state, router and memory
+
+Replaced the straight answer() pipeline with a LangGraph agent: condense -> route (structured output)
+-> retrieve -> generate, with action (stub) and decline branches. SQLite checkpointer keyed by thread_id
+gives conversation memory. Rendered docs/graph.png + graph.mmd.
+
+Verified live: follow-up "and casual leaves?" was condensed into a standalone question and answered "7";
+greetings route to decline; "raise a ticket" routes to the action stub; an intern asking salary bands is
+refused inside the agent (permission context from state, not the LLM). 121 tests (+2 opt-in agent tests).
+
+Lessons:
+- **The checkpointer is memory + durability + the basis for interrupts** (Phase 13). It stores the whole
+  state per thread_id.
+- **Structured output beats text parsing for routing** - a typed Literal can't be mis-parsed or hallucinated.
+- **Keep permission context in state, set from the session.** If the LLM could set it, injection could
+  escalate access. Trusted code enforces authz; the model never touches it.
+- LLM-using tests are opt-in (RUN_LLM_TESTS=1) to protect the free-tier token budget.
+
+_(add your own reflection: what the checkpointer stores, structured output vs parsing, why the LLM must not set identity)_

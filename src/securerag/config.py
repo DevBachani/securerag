@@ -61,6 +61,9 @@ class Settings(BaseSettings):
     # --- Governance ---
     pii_redaction_enabled: bool = True  # redact contact/ID PII before embedding
 
+    # --- Agent ---
+    agent_checkpoint_db: str = "checkpoints.db"  # SQLite file for LangGraph conversation state
+
     # --- Retrieval ---
     qdrant_url: str = "http://localhost:6333"
     qdrant_api_key: str = ""

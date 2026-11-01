@@ -1,0 +1,73 @@
+"""Assemble and run the LangGraph agent.
+
+Wiring: condense -> route -> {knowledge: retrieve -> generate, action: action_stub,
+out_of_scope: decline}. A SQLite checkpointer persists each conversation under its
+thread_id so chats survive restarts.
+"""
+
+from __future__ import annotations
+
+import sqlite3
+from functools import lru_cache
+from typing import Any
+
+from langchain_core.messages import HumanMessage
+from langgraph.graph import END, START, StateGraph
+
+from ..config import get_settings
+from ..retrieval.permissions import Principal
+from . import nodes
+from .state import AgentState
+
+
+def build_graph() -> StateGraph:
+    """Build the (uncompiled) agent graph."""
+    graph = StateGraph(AgentState)
+    graph.add_node("condense", nodes.condense)
+    graph.add_node("route", nodes.route)
+    graph.add_node("retrieve", nodes.retrieve_node)
+    graph.add_node("generate", nodes.generate)
+    graph.add_node("decline", nodes.decline)
+    graph.add_node("action", nodes.action_stub)
+
+    graph.add_edge(START, "condense")
+    graph.add_edge("condense", "route")
+    graph.add_conditional_edges(
+        "route",
+        lambda state: state["route"],
+        {"knowledge": "retrieve", "action": "action", "out_of_scope": "decline"},
+    )
+    graph.add_edge("retrieve", "generate")
+    graph.add_edge("generate", END)
+    graph.add_edge("action", END)
+    graph.add_edge("decline", END)
+    return graph
+
+
+@lru_cache
+def get_compiled_graph():
+    """Compile the graph once, with a persistent SQLite checkpointer."""
+    from langgraph.checkpoint.sqlite import SqliteSaver
+
+    conn = sqlite3.connect(get_settings().agent_checkpoint_db, check_same_thread=False)
+    return build_graph().compile(checkpointer=SqliteSaver(conn))
+
+
+def run_agent(question: str, principal: Principal, thread_id: str) -> dict[str, Any]:
+    """Run one turn of the agent for `principal` on conversation `thread_id`."""
+    final = get_compiled_graph().invoke(
+        {
+            "messages": [HumanMessage(question)],
+            "question": question,
+            "user_id": principal.id,
+            "user_groups": principal.groups,
+        },
+        config={"configurable": {"thread_id": thread_id}},
+    )
+    return {
+        "answer": final.get("answer", ""),
+        "citations": final.get("citations", []),
+        "retrieved": final.get("retrieved", []),
+        "refused": final.get("refused", False),
+        "route": final.get("route", ""),
+    }

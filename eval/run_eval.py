@@ -46,6 +46,7 @@ from ragas.metrics import (
 )
 from ragas.run_config import RunConfig
 
+from securerag.agent.graph import run_agent
 from securerag.config import get_settings
 from securerag.db.session import load_principal
 from securerag.evaluation import (
@@ -124,10 +125,18 @@ def _clean(value) -> float | None:
     return float(value)
 
 
+def _doc_id(item) -> str:
+    return item["doc_id"] if isinstance(item, dict) else item.doc_id
+
+
+def _text(item) -> str:
+    return item["text"] if isinstance(item, dict) else item.text
+
+
 def run_generation(
-    rows: list[dict], delay: float
+    rows: list[dict], delay: float, use_agent: bool = False
 ) -> tuple[list[dict], list[SingleTurnSample], list[str]]:
-    """Answer every question and compute the no-LLM custom metrics."""
+    """Answer every question (via the agent or the plain pipeline) and score custom metrics."""
     settings = get_settings()
     per_question: list[dict] = []
     samples: list[SingleTurnSample] = []
@@ -135,8 +144,11 @@ def run_generation(
 
     for row in rows:
         principal = load_principal(row["user_id"])
-        result = answer(row["question"], principal)
-        retrieved_ids = [r.doc_id for r in result["retrieved"]]
+        if use_agent:
+            result = run_agent(row["question"], principal, thread_id=f"eval-{row['id']}")
+        else:
+            result = answer(row["question"], principal)
+        retrieved_ids = [_doc_id(r) for r in result["retrieved"]]
         cited_ids = [c["doc_id"] for c in result["citations"]]
         is_unanswerable = row["category"] == "unanswerable"
 
@@ -158,7 +170,7 @@ def run_generation(
 
         # Ragas only scores answerable questions (a refusal has no reference answer).
         if not is_unanswerable:
-            contexts = [r.text for r in result["retrieved"][: settings.answer_context_chunks]]
+            contexts = [_text(r) for r in result["retrieved"][: settings.answer_context_chunks]]
             samples.append(
                 SingleTurnSample(
                     user_input=row["question"],
@@ -341,6 +353,11 @@ def main() -> None:
         action="store_true",
         help="Score hit_rate@k over the golden set from retrieval only (no LLM).",
     )
+    parser.add_argument(
+        "--agent",
+        action="store_true",
+        help="Generate answers via the LangGraph agent instead of the plain pipeline.",
+    )
     args = parser.parse_args()
 
     load_dotenv()
@@ -355,8 +372,8 @@ def main() -> None:
     ids = set(args.ids.split(",")) if args.ids else None
     rows = load_golden(args.limit, ids)
 
-    print(f"Running eval '{args.config_name}' on {len(rows)} questions...")
-    per_question, samples, sample_ids = run_generation(rows, args.delay)
+    print(f"Running eval '{args.config_name}' on {len(rows)} questions (agent={args.agent})...")
+    per_question, samples, sample_ids = run_generation(rows, args.delay, use_agent=args.agent)
     if args.no_ragas:
         print("Skipping Ragas (--no-ragas); computing custom metrics only.")
     else:
