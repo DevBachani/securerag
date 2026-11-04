@@ -235,3 +235,20 @@ Lessons:
   is not data leakage and is acceptable - which is why the structural guarantee matters most.
 
 _(add your own reflection: why a prompt can't stop injection, why the filter is the real guarantee, indirect injection)_
+
+## Phase 15 — FastAPI backend with auth and audit log
+
+Built the API: JWT login, SSE streaming chat, ticket approval, own-thread history, /tickets,
+admin audit + reingest, /health, per-user rate limiting (slowapi), CORS to the UI, and an audit row
+per chat request. 147 tests; server boots and /health is green.
+
+Lessons:
+- **Authenticate with the token, authorize from the DB.** The JWT carries only the user id; groups are
+  loaded fresh each request, so a permission change is immediate and the client can't tamper with groups.
+- **SSE fits one-way streaming** better than WebSockets here (HTTP-native, simple, auto-reconnect).
+- **The audit log is metadata, not content** - doc ids + status + latency, never the raw answer, so the
+  audit trail doesn't become a second leak path.
+- Ran the sync agent via run_in_threadpool so it doesn't block the async event loop.
+- Honest gap: chat streams a chunked replay of the finished answer, not live LLM tokens (astream later).
+
+_(add your own reflection: groups-from-DB each request, SSE vs WebSockets, what belongs in an audit log)_

@@ -82,6 +82,8 @@ class Settings(BaseSettings):
     jwt_secret: str = "change-me"
     jwt_expire_minutes: int = 60
     api_base_url: str = "http://localhost:8000"
+    ui_origin: str = "http://localhost:8501"  # Streamlit UI origin allowed by CORS
+    rate_limit_per_minute: int = 20  # per-user chat rate limit
 
     # --- Observability ---
     langfuse_public_key: str = ""

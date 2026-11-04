@@ -1,6 +1,6 @@
 # PROGRESS
 
-## Current phase: 15 — FastAPI backend with auth and audit log
+## Current phase: 16 — Observability with Langfuse
 ## Status: not started
 
 ## Environment
@@ -28,6 +28,7 @@
 | 12 — Self-correcting retrieval | 2026-11-01 | feat(agent): context grading, query rewriting and grounding check | grade_context -> rewrite (max 2) -> retrieve loop; check_grounding -> regenerate once -> refuse. Refusal never reveals a restricted doc. ~4s/question overhead (grade+grounding). 123 tests (+2 opt-in). |
 | 13 — Ticket tool + human approval | 2026-11-01 | feat(agent): ticket tool with human-in-the-loop approval | tickets table; draft_ticket (LLM) -> interrupt -> approve: create_ticket / reject: cancel. Idempotent per thread_id; tickets created as self; non-owner can't approve. 128 tests (+4 opt-in). |
 | 14 — Guardrails + injection defense | 2026-11-01 | feat(safety): injection tests, guardrails and validated outputs | Poisoned newsletter trap; 15-attack injection set -> attack_success_rate 0.0. guardrails: injection detector, untrusted-context prompt, cite-only-retrieved validation. 141 tests (+5 opt-in). |
+| 15 — FastAPI backend | 2026-11-04 | feat(api): fastapi with jwt auth, streaming chat, approvals and audit log | JWT login + per-request group load; SSE chat; ticket approve; own-thread history; /tickets; admin audit/reingest; /health; slowapi per-user limit; CORS to UI; audit row per chat (doc ids, not answers). 147 tests. |
 
 ## Key decisions (and why)
 - LLM = Ollama / llama3.1:latest (local): no API key, no free-tier limits; machine already has it installed.
@@ -70,6 +71,10 @@
 - Phase 13: human approval is a LangGraph interrupt() (enforced by the graph + checkpointer, outside the
   LLM). Tickets are created as the requesting user; create_ticket is idempotent per thread_id (unique), so
   double-resume creates one ticket. A non-owner cannot approve another user's pending ticket.
+- Phase 15: JWT carries only the user id; groups are loaded from the DB on every request (immediate
+  permission changes, no tampering). Chat streams over SSE as chunked replay of the completed answer (true
+  LLM token streaming via astream is deferred). Audit log stores doc ids + status, never the raw answer.
+  slowapi rate-limits per user; CORS restricted to the UI origin; /admin/* requires the admin group.
 - Embeddings = BAAI/bge-small-en-v1.5 via fastembed (384-dim), NOT Ollama's nomic-embed-text (768-dim):
   the whole retrieval design (Qdrant collection size, chunk payload, "prints 384" check) is built around 384.
 - GitHub: local repo only for now; no remote pushed yet.

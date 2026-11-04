@@ -65,6 +65,29 @@ class Ticket(SQLModel, table=True):
     approved_at: datetime | None = None
 
 
+class AuditLog(SQLModel, table=True):
+    """One row per chat request: who asked what, which docs, and the outcome.
+
+    Deliberately stores doc ids and a short status, never the raw answer text, so
+    the audit trail itself does not become a place confidential content leaks.
+    """
+
+    __tablename__ = "audit_log"
+
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: str = Field(index=True)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    question: str
+    route: str = ""
+    retrieved_doc_ids: str = "[]"  # JSON list of doc ids
+    cited_doc_ids: str = "[]"  # JSON list of doc ids
+    refused: bool = False
+    latency_ms: int = 0
+    tokens_in: int | None = None
+    tokens_out: int | None = None
+    trace_id: str | None = None
+
+
 class IngestState(SQLModel, table=True):
     """Per-document ingestion state, so sync only touches what changed.
 

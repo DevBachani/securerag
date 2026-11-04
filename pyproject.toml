@@ -5,6 +5,7 @@ requires-python = ">=3.11"
 dependencies = [
     "bcrypt>=5.0.0",
     "diskcache>=5.6.3",
+    "fastapi>=0.162.0",
     "fastembed>=0.9.0",
     "fpdf2>=2.8.9",
     "langchain-community>=0.4.2",
@@ -20,12 +21,16 @@ dependencies = [
     "llama-index-llms-ollama>=0.11.0",
     "ollama>=0.6.3",
     "pydantic-settings>=2.16.1",
+    "pyjwt>=2.15.1",
     "pymupdf4llm==0.0.27",
     "python-dotenv>=1.2.4",
     "qdrant-client>=1.19.1",
     "ragas>=0.4.3",
+    "slowapi>=0.1.10",
     "sqlmodel>=0.0.48",
+    "sse-starlette>=3.6.0",
     "tenacity>=9.2.1",
+    "uvicorn>=0.54.0",
 ]
 
 [build-system]
@@ -57,6 +62,7 @@ ignore = ["D203", "D213"]
 "tests/**" = ["D"]
 "scripts/**" = ["D"]
 "eval/**" = ["D", "E402"]  # eval runners install a compat shim before importing ragas
+"src/securerag/api/**" = ["B008"]  # FastAPI's Depends()-in-defaults is the intended idiom
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
