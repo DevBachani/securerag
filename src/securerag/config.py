@@ -89,6 +89,7 @@ class Settings(BaseSettings):
     langfuse_public_key: str = ""
     langfuse_secret_key: str = ""
     langfuse_host: str = "https://cloud.langfuse.com"
+    trace_content: bool = True  # False redacts inputs/outputs sent to Langfuse
 
 
 @lru_cache

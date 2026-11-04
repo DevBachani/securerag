@@ -8,12 +8,14 @@ thread_id so chats survive restarts.
 from __future__ import annotations
 
 import sqlite3
+import uuid
 from functools import lru_cache
 from typing import Any
 
 from langchain_core.messages import HumanMessage
 from langgraph.graph import END, START, StateGraph
 
+from .. import observability
 from ..config import get_settings
 from ..retrieval.permissions import Principal
 from . import nodes
@@ -118,8 +120,13 @@ def _result(state: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def run_agent(question: str, principal: Principal, thread_id: str) -> dict[str, Any]:
+def run_agent(
+    question: str, principal: Principal, thread_id: str, trace_id: str | None = None
+) -> dict[str, Any]:
     """Run one turn of the agent; may pause (interrupted) awaiting ticket approval."""
+    trace_id = trace_id or uuid.uuid4().hex
+    config: dict[str, Any] = {"configurable": {"thread_id": thread_id}}
+    config.update(observability.trace_config(principal.id, thread_id, trace_id))
     result = get_compiled_graph().invoke(
         {
             "messages": [HumanMessage(question)],
@@ -127,10 +134,13 @@ def run_agent(question: str, principal: Principal, thread_id: str) -> dict[str, 
             "user_id": principal.id,
             "user_groups": principal.groups,
             "thread_id": thread_id,
+            "trace_id": trace_id,
         },
-        config={"configurable": {"thread_id": thread_id}},
+        config=config,
     )
-    return _result(result)
+    out = _result(result)
+    out["trace_id"] = trace_id
+    return out
 
 
 def resume_ticket(

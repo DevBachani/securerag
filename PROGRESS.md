@@ -1,6 +1,6 @@
 # PROGRESS
 
-## Current phase: 16 — Observability with Langfuse
+## Current phase: 17 — Streamlit UI
 ## Status: not started
 
 ## Environment
@@ -29,6 +29,7 @@
 | 13 — Ticket tool + human approval | 2026-11-01 | feat(agent): ticket tool with human-in-the-loop approval | tickets table; draft_ticket (LLM) -> interrupt -> approve: create_ticket / reject: cancel. Idempotent per thread_id; tickets created as self; non-owner can't approve. 128 tests (+4 opt-in). |
 | 14 — Guardrails + injection defense | 2026-11-01 | feat(safety): injection tests, guardrails and validated outputs | Poisoned newsletter trap; 15-attack injection set -> attack_success_rate 0.0. guardrails: injection detector, untrusted-context prompt, cite-only-retrieved validation. 141 tests (+5 opt-in). |
 | 15 — FastAPI backend | 2026-11-04 | feat(api): fastapi with jwt auth, streaming chat, approvals and audit log | JWT login + per-request group load; SSE chat; ticket approve; own-thread history; /tickets; admin audit/reingest; /health; slowapi per-user limit; CORS to UI; audit row per chat (doc ids, not answers). 147 tests. |
+| 16 — Observability (Langfuse) | 2026-11-04 | feat(obs): langfuse tracing, cost and latency reporting | observability.py: graceful Langfuse callback handler (no-op without keys), pseudonymised user ids, trace_content redaction, trace_id linked into audit_log. latency_report.py from the audit log. 150 tests. |
 
 ## Key decisions (and why)
 - LLM = Ollama / llama3.1:latest (local): no API key, no free-tier limits; machine already has it installed.
@@ -103,6 +104,11 @@ Custom metrics, baseline (n=15, all categories): hit_rate@k **1.00**, citation_a
 Full 40-question Ragas pass deferred: Groq free tier is 200k tokens/day **per model** and today's runs exhausted gpt-oss-20b; re-run after daily reset (or on gpt-oss-120b).
 
 ## Open issues / questions
+- Phase 16 observed agent latency ~28s median / ~30s p95 per question (self-correction =
+  grade+grounding ≈ 5 Groq calls on gpt-oss-120b). Levers for a snappy UI: disable
+  SELF_CORRECTION_ENABLED, use a smaller Groq model, or cache. Decide before Phase 20 deploy.
+- Live Langfuse traces need the user's Langfuse Cloud keys + network reachability (sandbox may
+  block it like Gemini); the integration is graceful no-op without keys. latency_report works locally.
 - Machine has only ~8 GB RAM. llama3.1:8b (4.9 GB) runs but is tight once Qdrant + fastembed +
   (later) the cross-encoder reranker are loaded. Watch for OOM / slowness; fallback = gemma:2b or mistral:7b.
 - SPEC.md saved from a truncated paste (cut mid–Section 8). Replace with the full spec when available.

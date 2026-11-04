@@ -252,3 +252,22 @@ Lessons:
 - Honest gap: chat streams a chunked replay of the finished answer, not live LLM tokens (astream later).
 
 _(add your own reflection: groups-from-DB each request, SSE vs WebSockets, what belongs in an audit log)_
+
+## Phase 16 — Observability with Langfuse
+
+observability.py attaches a Langfuse LangChain callback handler to agent runs when keys are set, and is a
+no-op otherwise. User ids are pseudonymised (hashed) before telemetry; trace_content=False redacts
+inputs/outputs; a trace_id is generated per request and stored in audit_log so audit and trace link up.
+scripts/latency_report.py reads the audit log (works without Langfuse). 150 tests.
+
+What tracing revealed (the point of the phase): agent latency is ~28s median / ~30s p95 per question -
+self-correction adds grade+grounding (~5 Groq calls) on a slow 120B model. That's a real finding to act on
+before deploy (disable self-correction, smaller model, or cache).
+
+Lessons:
+- **Instrument for privacy:** pseudonymise user ids, allow content redaction - telemetry shouldn't leak.
+- **Trace linkage:** a shared trace_id across the audit log and the trace ties "what happened" to "how".
+- **Graceful degradation:** observability must never break the request; wrap it and no-op if unavailable.
+- **Measure to find waste:** the latency report surfaced the self-correction cost immediately.
+
+_(add your own reflection: traces vs spans, why pseudonymise, what to alert on)_
