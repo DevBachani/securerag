@@ -291,3 +291,23 @@ Lessons:
 - **Measure, then tune.** Observability (Phase 16) showed the latency; a model+flag change fixed the UX.
 
 _(add your own reflection: why the UI must never touch Qdrant directly, what to change for a production UI)_
+
+## Phase 18 — Docker Compose full stack
+
+Dockerfile (uv base, deps in a cached layer, models pre-downloaded, non-root user). One image runs the
+api, ui and a one-off init (seed + ingest) via different commands. docker-compose.yml: qdrant by default;
+the app services behind an "app" profile with healthchecks, depends_on conditions, and named volumes for
+Qdrant data and the SQLite DB. Makefile shortcuts (up/demo/down/test/eval). `make demo` = one command.
+
+Verified: init seeded+ingested and exited, api became healthy (/health ok in-container), ui health ok.
+Image is 9.35 GB (ONNX models + ML deps). The only snag was the host's port 8501 being taken by a local
+streamlit - the ui image itself is fine (verified on 8502).
+
+Deep-dive answers:
+- **Why non-root:** a container breakout as root is far more dangerous; least privilege limits blast radius.
+- **Why bake models into the image:** the first request isn't slowed by a multi-hundred-MB download, and the
+  container can run without network access to a model host - reproducible, faster cold start.
+- **What a healthcheck prevents:** depending services (ui) start only once api is actually serving, and
+  orchestrators can restart/replace unhealthy containers - avoids "up but not ready" races.
+
+_(add your own reflection: non-root, baking models, healthchecks)_

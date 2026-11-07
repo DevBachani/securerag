@@ -1,0 +1,17 @@
+.git
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.embeddings_cache
+.fastembed_cache
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+qdrant_storage
+.env
+eval_run.log
+docs
+tests

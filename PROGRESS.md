@@ -1,6 +1,6 @@
 # PROGRESS
 
-## Current phase: 18 — Docker Compose full stack
+## Current phase: 19 — Continuous integration with an evaluation gate
 ## Status: not started
 
 ## Environment
@@ -31,6 +31,7 @@
 | 15 — FastAPI backend | 2026-11-04 | feat(api): fastapi with jwt auth, streaming chat, approvals and audit log | JWT login + per-request group load; SSE chat; ticket approve; own-thread history; /tickets; admin audit/reingest; /health; slowapi per-user limit; CORS to UI; audit row per chat (doc ids, not answers). 147 tests. |
 | 16 — Observability (Langfuse) | 2026-11-04 | feat(obs): langfuse tracing, cost and latency reporting | observability.py: graceful Langfuse callback handler (no-op without keys), pseudonymised user ids, trace_content redaction, trace_id linked into audit_log. latency_report.py from the audit log. Live traces verified in Langfuse Cloud (US). 150 tests. |
 | 17 — Streamlit UI | 2026-11-07 | feat(ui): streamlit chat, access comparison, approvals and admin view | ui/app.py + api_client.py (UI talks only to the API). Login dropdown, streamed cited answers with sensitivity badges, ticket approve/reject, compare-access panel, admin audit+reingest. Full stack verified: CEO sees salary bands, intern refused. 150 tests. |
+| 18 — Docker Compose full stack | 2026-11-07 | feat(devops): dockerised stack with one-command demo | Dockerfile (uv, non-root, models baked in), one image for api+ui+init; compose: qdrant default, app profile (init seeds+ingests -> api healthy -> ui), healthchecks, named volumes. Makefile (up/demo/down/test/eval). Verified: api healthy, ui /_stcore/health ok. Image 9.35 GB. |
 
 ## Key decisions (and why)
 - LLM = Ollama / llama3.1:latest (local): no API key, no free-tier limits; machine already has it installed.
@@ -110,6 +111,8 @@ Full 40-question Ragas pass deferred: Groq free tier is 200k tokens/day **per mo
   gpt-oss-120b + self-correction for max quality / eval. (These live in .env, not committed.)
 - Live Langfuse traces need the user's Langfuse Cloud keys + network reachability (sandbox may
   block it like Gemini); the integration is graceful no-op without keys. latency_report works locally.
+- Phase 18 image is large (~9.35 GB) - ONNX models (esp. the pre-baked bge-reranker-base) + ML deps.
+  Slim options for later: drop the reranker pre-download, smaller base, or multi-stage to drop build tools.
 - Machine has only ~8 GB RAM. llama3.1:8b (4.9 GB) runs but is tight once Qdrant + fastembed +
   (later) the cross-encoder reranker are loaded. Watch for OOM / slowness; fallback = gemma:2b or mistral:7b.
 - SPEC.md saved from a truncated paste (cut mid–Section 8). Replace with the full spec when available.
