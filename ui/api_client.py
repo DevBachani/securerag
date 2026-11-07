@@ -38,9 +38,9 @@ def chat_stream(
         event = "message"
         for line in resp.iter_lines():
             if line.startswith("event:"):
-                event = line[len("event:"):].strip()
+                event = line[len("event:") :].strip()
             elif line.startswith("data:"):
-                yield event, line[len("data:"):].strip()
+                yield event, line[len("data:") :].strip()
 
 
 def approve(

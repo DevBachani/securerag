@@ -1,6 +1,6 @@
 # PROGRESS
 
-## Current phase: 19 — Continuous integration with an evaluation gate
+## Current phase: 20 — Free deployment
 ## Status: not started
 
 ## Environment
@@ -32,6 +32,7 @@
 | 16 — Observability (Langfuse) | 2026-11-04 | feat(obs): langfuse tracing, cost and latency reporting | observability.py: graceful Langfuse callback handler (no-op without keys), pseudonymised user ids, trace_content redaction, trace_id linked into audit_log. latency_report.py from the audit log. Live traces verified in Langfuse Cloud (US). 150 tests. |
 | 17 — Streamlit UI | 2026-11-07 | feat(ui): streamlit chat, access comparison, approvals and admin view | ui/app.py + api_client.py (UI talks only to the API). Login dropdown, streamed cited answers with sensitivity badges, ticket approve/reject, compare-access panel, admin audit+reingest. Full stack verified: CEO sees salary bands, intern refused. 150 tests. |
 | 18 — Docker Compose full stack | 2026-11-07 | feat(devops): dockerised stack with one-command demo | Dockerfile (uv, non-root, models baked in), one image for api+ui+init; compose: qdrant default, app profile (init seeds+ingests -> api healthy -> ui), healthchecks, named volumes. Makefile (up/demo/down/test/eval). Verified: api healthy, ui /_stcore/health ok. Image 9.35 GB. |
+| 19 — CI + eval gate | 2026-11-07 | ci: lint, tests and eval regression gate on pull requests | .github/workflows/ci.yml (ruff + format + unit tests) and eval.yml (Qdrant service -> seed+ingest -> leakage/injection/retrieval -> gate). thresholds.json; check_eval_gate.py. Gate proven locally: clean PASS, injected leak FAILS (exit 1). Quota-free (no secrets). 153 tests. |
 
 ## Key decisions (and why)
 - LLM = Ollama / llama3.1:latest (local): no API key, no free-tier limits; machine already has it installed.

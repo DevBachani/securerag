@@ -20,6 +20,10 @@ dist/
 venv/
 env/
 
+# --- CI-generated eval outputs (regenerated each run) ---
+eval/results/*_ci_*.json
+eval/results/gate_comment.md
+
 # --- Caches ---
 .pytest_cache/
 .ruff_cache/

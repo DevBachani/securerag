@@ -15,9 +15,7 @@ def _user_or_ip(request: Request) -> str:
     auth = request.headers.get("authorization", "")
     if auth.startswith("Bearer "):
         try:
-            payload = jwt.decode(
-                auth[7:], get_settings().jwt_secret, algorithms=["HS256"]
-            )
+            payload = jwt.decode(auth[7:], get_settings().jwt_secret, algorithms=["HS256"])
             return str(payload.get("sub", "anon"))
         except jwt.PyJWTError:
             pass

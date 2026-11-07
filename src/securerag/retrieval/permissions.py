@@ -34,9 +34,7 @@ def build_filter(principal: Principal, current_only: bool = True) -> models.Filt
     """
     must = []
     if current_only:
-        must.append(
-            models.FieldCondition(key="is_current", match=models.MatchValue(value=True))
-        )
+        must.append(models.FieldCondition(key="is_current", match=models.MatchValue(value=True)))
     return models.Filter(
         must=must,
         should=[

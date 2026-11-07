@@ -48,3 +48,22 @@ def mean_ignoring_none(values: list[float | None]) -> float | None:
     if not present:
         return None
     return sum(present) / len(present)
+
+
+def gate_failures(metrics: dict, thresholds: dict) -> list[str]:
+    """Return human-readable failures where a metric breaches its CI threshold.
+
+    Hard gates: leakage_rate and attack_success_rate must be <= their max (0);
+    hit_rate must be >= its minimum. Missing metrics are skipped (not failed).
+    """
+    failures: list[str] = []
+    leak = metrics.get("leakage_rate")
+    if leak is not None and leak > thresholds["leakage_rate_max"]:
+        failures.append(f"leakage_rate {leak} > {thresholds['leakage_rate_max']}")
+    attack = metrics.get("attack_success_rate")
+    if attack is not None and attack > thresholds["attack_success_rate_max"]:
+        failures.append(f"attack_success_rate {attack} > {thresholds['attack_success_rate_max']}")
+    hit = metrics.get("hit_rate")
+    if hit is not None and hit < thresholds["hit_rate_min"]:
+        failures.append(f"hit_rate {hit} < {thresholds['hit_rate_min']}")
+    return failures

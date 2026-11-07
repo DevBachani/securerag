@@ -50,8 +50,16 @@ async def chat(
 
     retrieved_ids = [_doc_id(d) for d in result["retrieved"]]
     cited_ids = [c["doc_id"] for c in result["citations"]]
-    write_audit(user.id, body.message, result["route"], retrieved_ids, cited_ids,
-                result["refused"], latency_ms, trace_id=result.get("trace_id"))
+    write_audit(
+        user.id,
+        body.message,
+        result["route"],
+        retrieved_ids,
+        cited_ids,
+        result["refused"],
+        latency_ms,
+        trace_id=result.get("trace_id"),
+    )
 
     async def event_stream():
         for word in result["answer"].split():

@@ -23,8 +23,6 @@ def test_chunk_count_is_stable_across_runs():
 def test_pdf_pages_get_page_sections():
     # The salary-bands PDF should produce at least one chunk labelled "Page N".
     nodes = chunk_documents(load_documents())
-    pdf_sections = [
-        section_of(n) for n in nodes if n.metadata.get("doc_id") == "hr-salary-bands"
-    ]
+    pdf_sections = [section_of(n) for n in nodes if n.metadata.get("doc_id") == "hr-salary-bands"]
     assert pdf_sections, "no chunks for the salary-bands PDF"
     assert any(s.startswith("Page ") for s in pdf_sections)

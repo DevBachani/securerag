@@ -67,12 +67,18 @@ def _auth(token: str) -> dict:
 
 
 def test_login_success_and_bad_password(client):
-    assert client.post(
-        "/auth/login", json={"email": "sneha.rao@acme.example", "password": _PASSWORD}
-    ).status_code == 200
-    assert client.post(
-        "/auth/login", json={"email": "sneha.rao@acme.example", "password": "nope"}
-    ).status_code == 401
+    assert (
+        client.post(
+            "/auth/login", json={"email": "sneha.rao@acme.example", "password": _PASSWORD}
+        ).status_code
+        == 200
+    )
+    assert (
+        client.post(
+            "/auth/login", json={"email": "sneha.rao@acme.example", "password": "nope"}
+        ).status_code
+        == 401
+    )
 
 
 def test_chat_requires_a_token(client):

@@ -311,3 +311,25 @@ Deep-dive answers:
   orchestrators can restart/replace unhealthy containers - avoids "up but not ready" races.
 
 _(add your own reflection: non-root, baking models, healthchecks)_
+
+## Phase 19 — CI with an evaluation gate
+
+.github/workflows/ci.yml (ruff lint + format check + unit tests on every push/PR) and eval.yml (on PRs
+touching src/eval/prompts: spin up a Qdrant service, seed + ingest, run leakage/injection/retrieval, then
+check_eval_gate.py vs eval/thresholds.json). gate_failures() is the pure, unit-tested comparison.
+
+Design choice: the CI gate is **retrieval-only -> no LLM, no secrets, deterministic**. leakage_rate and
+attack_success_rate are HARD fails (must be 0); hit_rate has a floor. Proven locally: clean = PASS, an
+injected leak = FAIL (exit 1), which would block the PR. 153 tests.
+
+Deep-dive answers:
+- **Subset in CI, full set nightly:** CI runs on every PR, so it must be fast/cheap; a quota-free subset
+  gives quick signal, while the full ragas set (many judge calls) runs nightly/pre-release.
+- **Leakage hard-fail vs faithfulness tolerance:** leakage is a binary security property - any leak is a
+  breach (==0). Faithfulness is a noisy quality metric - demanding an exact value makes CI flaky, so use a
+  tolerance band vs baseline. Security = absolute; quality = relative.
+- **Flaky LLM judge:** temperature 0, pinned judge, average over samples, compare to a baseline with a
+  tolerance (not an exact threshold), limited retries - and keep the HARD gates on the deterministic,
+  quota-free metrics so the critical gate never flakes.
+
+_(add your own reflection: CI subset vs nightly, hard-fail vs tolerance, flaky judges)_

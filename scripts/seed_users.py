@@ -17,22 +17,32 @@ GROUPS = ["all", "leadership", "hr", "finance", "engineering", "managers", "admi
 
 # (id, name, email, role, groups) -- mirrors SPEC section 4.
 USERS = [
-    ("u_ceo", "Vikram Shah", "vikram.shah@acme.example", "CEO",
-     ["leadership", "hr", "finance", "engineering", "all"]),
-    ("u_hrm", "Priya Mehta", "priya.mehta@acme.example", "HR Manager",
-     ["hr", "managers", "all"]),
-    ("u_hre", "Meera Joshi", "meera.joshi@acme.example", "HR Executive",
-     ["hr", "all"]),
-    ("u_fin", "Anita Desai", "anita.desai@acme.example", "Finance Analyst",
-     ["finance", "all"]),
-    ("u_engm", "Arjun Patel", "arjun.patel@acme.example", "Engineering Manager",
-     ["engineering", "managers", "all"]),
-    ("u_eng", "Rahul Verma", "rahul.verma@acme.example", "Software Engineer",
-     ["engineering", "all"]),
-    ("u_int", "Sneha Rao", "sneha.rao@acme.example", "Intern",
-     ["all"]),
-    ("u_admin", "Admin", "admin@acme.example", "Platform Admin",
-     ["admin", "all"]),
+    (
+        "u_ceo",
+        "Vikram Shah",
+        "vikram.shah@acme.example",
+        "CEO",
+        ["leadership", "hr", "finance", "engineering", "all"],
+    ),
+    ("u_hrm", "Priya Mehta", "priya.mehta@acme.example", "HR Manager", ["hr", "managers", "all"]),
+    ("u_hre", "Meera Joshi", "meera.joshi@acme.example", "HR Executive", ["hr", "all"]),
+    ("u_fin", "Anita Desai", "anita.desai@acme.example", "Finance Analyst", ["finance", "all"]),
+    (
+        "u_engm",
+        "Arjun Patel",
+        "arjun.patel@acme.example",
+        "Engineering Manager",
+        ["engineering", "managers", "all"],
+    ),
+    (
+        "u_eng",
+        "Rahul Verma",
+        "rahul.verma@acme.example",
+        "Software Engineer",
+        ["engineering", "all"],
+    ),
+    ("u_int", "Sneha Rao", "sneha.rao@acme.example", "Intern", ["all"]),
+    ("u_admin", "Admin", "admin@acme.example", "Platform Admin", ["admin", "all"]),
 ]
 
 DEMO_PASSWORD = "demo1234"  # documented in .env.example; demo only
@@ -58,16 +68,13 @@ def main() -> None:
         for user_id, name, email, role, groups in USERS:
             if session.get(User, user_id) is None:
                 session.add(
-                    User(id=user_id, name=name, email=email, role=role,
-                         password_hash=password_hash)
+                    User(id=user_id, name=name, email=email, role=role, password_hash=password_hash)
                 )
                 session.commit()
             for group_name in groups:
                 gid = name_to_id[group_name]
                 exists = session.exec(
-                    select(UserGroup).where(
-                        UserGroup.user_id == user_id, UserGroup.group_id == gid
-                    )
+                    select(UserGroup).where(UserGroup.user_id == user_id, UserGroup.group_id == gid)
                 ).first()
                 if exists is None:
                     session.add(UserGroup(user_id=user_id, group_id=gid))

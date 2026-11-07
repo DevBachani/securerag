@@ -15,8 +15,12 @@ from securerag.config import get_settings
 from securerag.db import session as db_session
 from securerag.db.models import Ticket
 
-DRAFT = {"title": "Laptop screen broken", "description": "Cracked screen", "department": "IT",
-         "priority": "high"}
+DRAFT = {
+    "title": "Laptop screen broken",
+    "description": "Cracked screen",
+    "department": "IT",
+    "priority": "high",
+}
 
 
 @pytest.fixture

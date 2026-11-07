@@ -25,9 +25,7 @@ def main() -> None:
     args = parser.parse_args()
 
     with get_session() as session:
-        rows = session.exec(
-            select(AuditLog).order_by(AuditLog.id.desc()).limit(args.limit)
-        ).all()
+        rows = session.exec(select(AuditLog).order_by(AuditLog.id.desc()).limit(args.limit)).all()
 
     if not rows:
         print("No audit rows yet. Make some /chat requests first.")

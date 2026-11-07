@@ -189,8 +189,7 @@ def get_langchain_llm() -> Any:
         return ChatGroq(model=s.llm_model, api_key=s.groq_api_key, temperature=s.llm_temperature)
 
     raise ValueError(
-        f"get_langchain_llm() does not support provider {provider!r} yet "
-        "(supported: ollama, groq)."
+        f"get_langchain_llm() does not support provider {provider!r} yet (supported: ollama, groq)."
     )
 
 

@@ -21,9 +21,7 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 def audit(limit: int = 100, _: Principal = Depends(require_admin)) -> list[dict]:
     """Return the most recent audit rows."""
     with get_session() as session:
-        rows = session.exec(
-            select(AuditLog).order_by(AuditLog.id.desc()).limit(limit)
-        ).all()
+        rows = session.exec(select(AuditLog).order_by(AuditLog.id.desc()).limit(limit)).all()
         return [row.model_dump() for row in rows]
 
 

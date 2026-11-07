@@ -233,8 +233,7 @@ def create_ticket_node(state: AgentState) -> dict[str, Any]:
         draft["title"] = decision["edited_title"]
     ticket = tools.create_ticket(draft, state["user_id"], state["thread_id"])
     message = (
-        f"Ticket #{ticket.id} created: '{ticket.title}' "
-        f"({ticket.department}, {ticket.priority})."
+        f"Ticket #{ticket.id} created: '{ticket.title}' ({ticket.department}, {ticket.priority})."
     )
     return {
         "ticket_id": ticket.id,
