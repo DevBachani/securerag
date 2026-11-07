@@ -30,6 +30,7 @@ dependencies = [
     "slowapi>=0.1.10",
     "sqlmodel>=0.0.48",
     "sse-starlette>=3.6.0",
+    "streamlit>=1.66.1",
     "tenacity>=9.2.1",
     "uvicorn>=0.54.0",
 ]
@@ -64,6 +65,7 @@ ignore = ["D203", "D213"]
 "scripts/**" = ["D"]
 "eval/**" = ["D", "E402"]  # eval runners install a compat shim before importing ragas
 "src/securerag/api/**" = ["B008"]  # FastAPI's Depends()-in-defaults is the intended idiom
+"ui/**" = ["D"]  # Streamlit app is script-style
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

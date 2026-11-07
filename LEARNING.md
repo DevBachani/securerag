@@ -271,3 +271,23 @@ Lessons:
 - **Measure to find waste:** the latency report surfaced the self-correction cost immediately.
 
 _(add your own reflection: traces vs spans, why pseudonymise, what to alert on)_
+
+## Phase 17 — Streamlit UI
+
+ui/app.py + ui/api_client.py: a thin UI that talks ONLY to the FastAPI backend (no direct DB/Qdrant).
+Login dropdown of demo users, streamed answers (SSE) with citations + sensitivity badges, ticket
+approve/reject card, the "compare access" side-by-side panel, and an admin audit/reingest view.
+
+Verified the full stack through the UI client: CEO gets the salary bands (cites hr-salary-bands), the
+intern is refused - the headline demo works end to end.
+
+Before this I tuned latency: LLM_MODEL=gpt-oss-20b + SELF_CORRECTION_ENABLED=false -> ~8s/question
+(from ~28s), answers still correct. 150 tests.
+
+Lessons:
+- **Keep the UI thin.** All logic/permissions stay server-side; the UI just calls the API, so there's one
+  enforcement point and the UI can't bypass it.
+- **Consume SSE on the client** by parsing event/data lines into tokens + a final JSON event.
+- **Measure, then tune.** Observability (Phase 16) showed the latency; a model+flag change fixed the UX.
+
+_(add your own reflection: why the UI must never touch Qdrant directly, what to change for a production UI)_

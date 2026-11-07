@@ -169,6 +169,7 @@ def generate(state: AgentState) -> dict[str, Any]:
                     "title": chunk.title,
                     "section": chunk.section,
                     "page": chunk.page,
+                    "sensitivity": getattr(chunk, "sensitivity", ""),
                 }
             )
 
