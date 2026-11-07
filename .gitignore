@@ -1,6 +1,9 @@
 # --- Secrets & local state (never commit) ---
 .env
 *.db
+*.db-shm
+*.db-wal
+*.db-journal
 *.sqlite
 *.sqlite3
 qdrant_storage/
